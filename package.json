@@ -5,7 +5,7 @@
   "main": "index.js",
   "keywords": [],
   "author": "James George",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "actions-toolkit": "^5.0.0"
   }
