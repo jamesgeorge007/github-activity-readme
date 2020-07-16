@@ -94,17 +94,17 @@ Toolkit.run(
     const readmeContent = fs.readFileSync('./README.md', 'utf-8').split('\n')
 
     let startIdx = readmeContent.findIndex(
-      (content) => content === '<!--START-->'
+      (content) => content === '<!--START_SECTION:activity-->'
     )
     if (
-      readmeContent.includes('<!--START-->') &&
-      !readmeContent.includes('<!--END-->')
+      readmeContent.includes('<!--START_SECTION:activity-->') &&
+      !readmeContent.includes('<!--END_SECTION:activity-->')
     ) {
       startIdx++
       content.forEach((line, idx) =>
         readmeContent.splice(startIdx + idx, 0, `${idx + 1}. ${line}`)
       )
-      readmeContent.splice(startIdx + content.length, 0, '<!--END-->')
+      readmeContent.splice(startIdx + content.length, 0, '<!--END_SECTION:activity-->')
       fs.writeFileSync('./README.md', readmeContent.join('\n'))
       try {
         await commitFile()
@@ -116,7 +116,7 @@ Toolkit.run(
     }
 
     const endIdx = readmeContent.findIndex(
-      (content) => content === '<!--END-->'
+      (content) => content === '<!--END_SECTION:activity-->'
     )
     const oldContent = readmeContent.slice(startIdx + 1, endIdx).join('\n')
     console.log()
