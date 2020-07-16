@@ -1,0 +1,9 @@
+name: GitHub - Activity - Readme
+description: Updates README with the recent GitHub activity of a user
+author: jamesgeorge007
+branding:
+  color: yellow
+  icon: activity
+runs:
+  using: docker
+  image: Dockerfile

@@ -1,0 +1,147 @@
+require('dotenv').config()
+const { spawn } = require('child_process')
+const path = require('path')
+
+const fs = require('fs')
+
+const { Toolkit } = require('actions-toolkit')
+
+const MAX_LINES = 5
+
+const capitalize = (str) => str.slice(0, 1).toUpperCase() + str.slice(1)
+
+const urlPrefix = 'https://github.com/'
+
+const toUrlFormat = (item) => {
+  if (typeof item === 'object') {
+    return Object.hasOwnProperty.call(item.payload, 'issue')
+      ? `[#${item.payload.issue.number}](${urlPrefix}/${item.repo.name}/issues/${item.payload.issue.number})`
+      : `[#${item.payload.pull_request.number}](${urlPrefix}/${item.repo.name}/pull/${item.payload.pull_request.number})`
+  }
+  return `[${item}](${urlPrefix}/${item})`
+}
+
+const exec = (cmd, args = []) =>
+  new Promise((resolve, reject) => {
+    console.log(`Started: ${cmd} ${args.join(' ')}`)
+    const app = spawn(cmd, args, { stdio: 'inherit' })
+    app.on('close', (code) => {
+      if (code !== 0) {
+        err = new Error(`Invalid status code: ${code}`)
+        err.code = code
+        return reject(err)
+      }
+      return resolve(code)
+    })
+    app.on('error', reject)
+  })
+
+const commitFile = async () => {
+  await exec('git', [
+    'config',
+    '--global',
+    'user.email',
+    'readme-bot@example.com',
+  ])
+  await exec('git', ['config', '--global', 'user.name', 'readme-bot'])
+  await exec('git', ['add', 'README.md'])
+  await exec('git', ['commit', '-m', 'update'])
+  await exec('git', ['push'])
+}
+
+const serializers = {
+  IssueCommentEvent: (item) => {
+    return `🗣 Commented on ${toUrlFormat(item)} in ${toUrlFormat(
+      item.repo.name
+    )}`
+  },
+  IssuesEvent: (item) => {
+    return `❗️ ${capitalize(item.payload.action)} issue ${toUrlFormat(
+      item
+    )} in ${toUrlFormat(item.repo.name)}`
+  },
+  PullRequestEvent: (item) => {
+    const emoji = item.payload.action === 'opened' ? '💪' : '❌'
+    const line = item.payload.pull_request.merged
+      ? '🎉 Merged'
+      : `${emoji} ${capitalize(item.payload.action)}`
+    return `${line} PR ${toUrlFormat(item)} in ${toUrlFormat(item.repo.name)}`
+  },
+}
+
+Toolkit.run(
+  async (tools) => {
+    const { GH_USERNAME, GH_PAT } = process.env
+
+    // Get the user's public events
+    tools.log.debug(`Getting activity for ${GH_USERNAME}`)
+    const events = await tools.github.activity.listPublicEventsForUser({
+      username: GH_USERNAME,
+      per_page: 100,
+    })
+    tools.log.debug(
+      `Activity for ${GH_USERNAME}, ${events.data.length} events found.`
+    )
+
+    const content = events.data
+      // Filter out any boring activity
+      .filter((event) => serializers.hasOwnProperty(event.type))
+      // We only have five lines to work with
+      .slice(0, MAX_LINES)
+      // Call the serializer to construct a string
+      .map((item) => serializers[item.type](item))
+
+    const readmeContent = fs.readFileSync('./README.md', 'utf-8').split('\n')
+
+    let startIdx = readmeContent.findIndex(
+      (content) => content === '<!--START-->'
+    )
+    if (
+      readmeContent.includes('<!--START-->') &&
+      !readmeContent.includes('<!--END-->')
+    ) {
+      startIdx++
+      content.forEach((line, idx) =>
+        readmeContent.splice(startIdx + idx, 0, `${idx + 1}. ${line}`)
+      )
+      readmeContent.splice(startIdx + content.length, 0, '<!--END-->')
+      fs.writeFileSync('./README.md', readmeContent.join('\n'))
+      try {
+        await commitFile()
+      } catch (err) {
+        tools.log.debug('Something went wrong')
+        return tools.exit.failure(err)
+      }
+      tools.exit.success('Created initial setup')
+    }
+
+    const endIdx = readmeContent.findIndex(
+      (content) => content === '<!--END-->'
+    )
+    const oldContent = readmeContent.slice(startIdx + 1, endIdx).join('\n')
+    console.log()
+    const newContent = content
+      .map((line, idx) => `${idx + 1}. ${line}`)
+      .join('\n')
+
+    if (oldContent.trim() === newContent.trim())
+      tools.exit.success('No changes detected')
+
+    startIdx++
+    content.forEach(
+      (line, idx) => (readmeContent[startIdx + idx] = `${idx + 1}. ${line}`)
+    )
+    fs.writeFileSync('./README.md', readmeContent.join('\n'))
+    try {
+      await commitFile()
+    } catch (err) {
+      tools.log.debug('Something went wrong')
+      return tools.exit.failure(err)
+    }
+    tools.exit.success('Updated ')
+  },
+  {
+    event: 'schedule',
+    secrets: ['GITHUB_TOKEN', 'GH_PAT', 'GH_USERNAME'],
+  }
+)
