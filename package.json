@@ -8,5 +8,8 @@
   "license": "MIT",
   "dependencies": {
     "actions-toolkit": "^5.0.0"
+  },
+  "devDependencies": {
+    "dotenv": "^8.2.0"
   }
 }
