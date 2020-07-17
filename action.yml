@@ -1,9 +1,16 @@
 name: GitHub - Activity - Readme
 description: Updates README with the recent GitHub activity of a user
 author: jamesgeorge007
+
+inputs:
+  USERNAME:
+    description: 'Your GitHub username'
+    default: ${{ github.repository_owner }}
+
 branding:
   color: yellow
   icon: activity
+
 runs:
-  using: docker
-  image: Dockerfile
+  using: node12
+  main: dist/index.js

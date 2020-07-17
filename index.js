@@ -1,9 +1,7 @@
-require('dotenv').config()
-const { spawn } = require('child_process')
-const path = require('path')
-
+const core = require('@actions/core')
 const fs = require('fs')
-
+const path = require('path')
+const { spawn } = require('child_process')
 const { Toolkit } = require('actions-toolkit')
 
 const MAX_LINES = 5
@@ -71,7 +69,7 @@ const serializers = {
 
 Toolkit.run(
   async (tools) => {
-    const { GH_USERNAME, GH_PAT } = process.env
+    const GH_USERNAME = core.getInput('USERNAME')
 
     // Get the user's public events
     tools.log.debug(`Getting activity for ${GH_USERNAME}`)
@@ -142,6 +140,6 @@ Toolkit.run(
   },
   {
     event: 'schedule',
-    secrets: ['GITHUB_TOKEN', 'GH_PAT', 'GH_USERNAME'],
+    secrets: ['GITHUB_TOKEN'],
   }
 )
