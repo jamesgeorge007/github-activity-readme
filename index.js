@@ -21,7 +21,6 @@ const toUrlFormat = (item) => {
 
 const exec = (cmd, args = []) =>
   new Promise((resolve, reject) => {
-    console.log(`Started: ${cmd} ${args.join(" ")}`);
     const app = spawn(cmd, args, { stdio: "inherit" });
     app.on("close", (code) => {
       if (code !== 0) {
@@ -121,7 +120,6 @@ Toolkit.run(
       (content) => content === "<!--END_SECTION:activity-->"
     );
     const oldContent = readmeContent.slice(startIdx + 1, endIdx).join("\n");
-    console.log();
     const newContent = content
       .map((line, idx) => `${idx + 1}. ${line}`)
       .join("\n");
@@ -130,9 +128,15 @@ Toolkit.run(
       tools.exit.success("No changes detected");
 
     startIdx++;
-    content.forEach(
-      (line, idx) => (readmeContent[startIdx + idx] = `${idx + 1}. ${line}`)
-    );
+
+    let count = 0;
+    readmeContent.slice(startIdx, endIdx).forEach((line, idx) => {
+      if (line !== "") {
+        readmeContent[startIdx + idx] = `${count + 1}. ${content[count]}`;
+        count++;
+      }
+    });
+
     fs.writeFileSync("./README.md", readmeContent.join("\n"));
     try {
       await commitFile();
