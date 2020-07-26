@@ -6,9 +6,23 @@ const { Toolkit } = require("actions-toolkit");
 
 const MAX_LINES = 5;
 
+/**
+ * Returns the sentence case representation
+ * @param {String} str - the string
+ *
+ * @returns {String}
+ */
+
 const capitalize = (str) => str.slice(0, 1).toUpperCase() + str.slice(1);
 
 const urlPrefix = "https://github.com/";
+
+/**
+ * Returns a URL in markdown format for PR's and issues
+ * @param {Object | String} item - holds information concerning the issue/PR
+ *
+ * @returns {String}
+ */
 
 const toUrlFormat = (item) => {
   if (typeof item === "object") {
@@ -18,6 +32,14 @@ const toUrlFormat = (item) => {
   }
   return `[${item}](${urlPrefix}/${item})`;
 };
+
+/**
+ * Execute shell command
+ * @param {String} cmd - root command
+ * @param {String[]} args - args to be passed alongwith
+ *
+ * @returns {Promise<void>}
+ */
 
 const exec = (cmd, args = []) =>
   new Promise((resolve, reject) => {
@@ -32,6 +54,12 @@ const exec = (cmd, args = []) =>
     });
     app.on("error", reject);
   });
+
+/**
+ * Make a commit
+ *
+ * @returns {Promise<void>}
+ */
 
 const commitFile = async () => {
   await exec("git", [
@@ -129,6 +157,7 @@ Toolkit.run(
 
     startIdx++;
 
+    // it is likely that a newline is inserted after the <!--START_SECTION:activity--> comment (code formatter)
     let count = 0;
     readmeContent.slice(startIdx, endIdx).forEach((line, idx) => {
       if (line !== "") {
