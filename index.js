@@ -176,7 +176,7 @@ Toolkit.run(
     tools.exit.success("Updated ");
   },
   {
-    event: "schedule",
+    event: ["schedule", "workflow_dispatch"],
     secrets: ["GITHUB_TOKEN"],
   }
 );
