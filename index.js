@@ -70,7 +70,11 @@ const commitFile = async () => {
   ]);
   await exec("git", ["config", "--global", "user.name", "readme-bot"]);
   await exec("git", ["add", "README.md"]);
-  await exec("git", ["commit", "-m", "update"]);
+  await exec("git", [
+    "commit",
+    "-m",
+    ":zap: update readme with the recent activity",
+  ]);
   await exec("git", ["push"]);
 };
 
@@ -118,35 +122,50 @@ Toolkit.run(
 
     const readmeContent = fs.readFileSync("./README.md", "utf-8").split("\n");
 
+    // Find the indec corresponding to <!--START_SECTION:activity--> comment
     let startIdx = readmeContent.findIndex(
-      (content) => content === "<!--START_SECTION:activity-->"
+      (content) => content.trim() === "<!--START_SECTION:activity-->"
     );
-    if (
-      readmeContent.includes("<!--START_SECTION:activity-->") &&
-      !readmeContent.includes("<!--END_SECTION:activity-->")
-    ) {
+
+    // Early return in case the <!--START_SECTION:activity--> comment was not found
+    if (startIdx === -1) {
+      return tools.exit.failure(
+        `Couldn't find the <!--START_SECTION:activity--> comment. Exiting!`
+      );
+    }
+
+    // Find the index corresponding to <!--END_SECTION:activity--> comment
+    const endIdx = readmeContent.findIndex(
+      (content) => content.trim() === "<!--END_SECTION:activity-->"
+    );
+
+    if (startIdx !== -1 && endIdx === -1) {
+      // Add one since the content needs to be inserted just after the initial comment
       startIdx++;
       content.forEach((line, idx) =>
         readmeContent.splice(startIdx + idx, 0, `${idx + 1}. ${line}`)
       );
+
+      // Append <!--END_SECTION:activity--> comment
       readmeContent.splice(
         startIdx + content.length,
         0,
         "<!--END_SECTION:activity-->"
       );
+
+      // Update README
       fs.writeFileSync("./README.md", readmeContent.join("\n"));
+
+      // Commit to the remote repository
       try {
         await commitFile();
       } catch (err) {
         tools.log.debug("Something went wrong");
         return tools.exit.failure(err);
       }
-      tools.exit.success("Created initial setup");
+      tools.exit.success("Wrote to README");
     }
 
-    const endIdx = readmeContent.findIndex(
-      (content) => content === "<!--END_SECTION:activity-->"
-    );
     const oldContent = readmeContent.slice(startIdx + 1, endIdx).join("\n");
     const newContent = content
       .map((line, idx) => `${idx + 1}. ${line}`)
@@ -157,23 +176,37 @@ Toolkit.run(
 
     startIdx++;
 
-    // it is likely that a newline is inserted after the <!--START_SECTION:activity--> comment (code formatter)
-    let count = 0;
-    readmeContent.slice(startIdx, endIdx).forEach((line, idx) => {
-      if (line !== "") {
-        readmeContent[startIdx + idx] = `${count + 1}. ${content[count]}`;
-        count++;
-      }
-    });
+    // Recent GitHub Activity content between the comments
+    const readmeActivitySection = readmeContent.slice(startIdx, endIdx);
+    if (!readmeActivitySection.length) {
+      content.forEach((line, idx) => {
+        readmeContent.splice(startIdx + idx, 0, `${idx + 1}. ${line}`);
+      });
+      tools.log.success("Wrote to README");
+    } else {
+      // It is likely that a newline is inserted after the <!--START_SECTION:activity--> comment (code formatter)
+      let count = 0;
 
+      readmeActivitySection.forEach((line, idx) => {
+        if (line !== "") {
+          readmeContent[startIdx + idx] = `${count + 1}. ${content[count]}`;
+          count++;
+        }
+      });
+      tools.log.success("Updated README with the recent activity");
+    }
+
+    // Update README
     fs.writeFileSync("./README.md", readmeContent.join("\n"));
+
+    // Commit to the remote repository
     try {
       await commitFile();
     } catch (err) {
       tools.log.debug("Something went wrong");
       return tools.exit.failure(err);
     }
-    tools.exit.success("Updated ");
+    tools.exit.success("Pushed to remote repository");
   },
   {
     event: ["schedule", "workflow_dispatch"],
