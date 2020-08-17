@@ -139,6 +139,14 @@ Toolkit.run(
       (content) => content.trim() === "<!--END_SECTION:activity-->"
     );
 
+    if (!content.length) {
+      tools.exit.failure("No events found");
+    }
+
+    if (content.length < 5) {
+      tools.log.info("Found less than 5 activities");
+    }
+
     if (startIdx !== -1 && endIdx === -1) {
       // Add one since the content needs to be inserted just after the initial comment
       startIdx++;

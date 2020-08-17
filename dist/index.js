@@ -1545,7 +1545,11 @@ const commitFile = async () => {
   ]);
   await exec("git", ["config", "--global", "user.name", "readme-bot"]);
   await exec("git", ["add", "README.md"]);
-  await exec("git", ["commit", "-m", ":zap: update readme with the recent activity"]);
+  await exec("git", [
+    "commit",
+    "-m",
+    ":zap: update readme with the recent activity",
+  ]);
   await exec("git", ["push"]);
 };
 
@@ -1609,6 +1613,14 @@ Toolkit.run(
     const endIdx = readmeContent.findIndex(
       (content) => content.trim() === "<!--END_SECTION:activity-->"
     );
+
+    if (!content.length) {
+      tools.exit.failure("No events found");
+    }
+
+    if (content.length < 5) {
+      tools.log.info("Found less than 5 activities");
+    }
 
     if (startIdx !== -1 && endIdx === -1) {
       // Add one since the content needs to be inserted just after the initial comment
