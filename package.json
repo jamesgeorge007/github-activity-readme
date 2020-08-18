@@ -7,6 +7,7 @@
   "author": "James George",
   "license": "MIT",
   "scripts": {
+    "format:check": "prettier --check index.js",
     "format": "prettier --write index.js",
     "build": "ncc build index.js -o dist"
   },
