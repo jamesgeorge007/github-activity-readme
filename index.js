@@ -187,7 +187,11 @@ Toolkit.run(
     // Recent GitHub Activity content between the comments
     const readmeActivitySection = readmeContent.slice(startIdx, endIdx);
     if (!readmeActivitySection.length) {
-      content.forEach((line, idx) => {
+      content.some((line, idx) => {
+        // User doesn't have 5 public events
+        if (!line) {
+          return true;
+        }
         readmeContent.splice(startIdx + idx, 0, `${idx + 1}. ${line}`);
       });
       tools.log.success("Wrote to README");
@@ -195,7 +199,11 @@ Toolkit.run(
       // It is likely that a newline is inserted after the <!--START_SECTION:activity--> comment (code formatter)
       let count = 0;
 
-      readmeActivitySection.forEach((line, idx) => {
+      readmeActivitySection.some((line, idx) => {
+        // User doesn't have 5 public events
+        if (!content[count]) {
+          return true;
+        }
         if (line !== "") {
           readmeContent[startIdx + idx] = `${count + 1}. ${content[count]}`;
           count++;
