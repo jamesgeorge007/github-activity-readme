@@ -25,6 +25,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    name: Update README
 
     steps:
       - uses: actions/checkout@v2
