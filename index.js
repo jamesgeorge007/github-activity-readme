@@ -45,8 +45,8 @@ const exec = (cmd, args = []) =>
   new Promise((resolve, reject) => {
     const app = spawn(cmd, args, { stdio: "inherit" });
     var stdout;
-    app.stdout.on('data', (data) => {
-      stdout = data
+    app.stdout.on("data", (data) => {
+      stdout = data;
     });
     app.on("close", (code) => {
       if (code !== 0 && !stdout.includes("nothing to commit")) {
