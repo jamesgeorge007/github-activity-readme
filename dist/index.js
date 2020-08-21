@@ -1518,7 +1518,7 @@ const toUrlFormat = (item) => {
 
 const exec = (cmd, args = []) =>
   new Promise((resolve, reject) => {
-    const app = spawn(cmd, args, { stdio: "inherit" });
+    const app = spawn(cmd, args, { stdio: "pipe" });
     var stdout;
     app.stdout.on("data", (data) => {
       stdout = data;
