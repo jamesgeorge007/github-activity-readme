@@ -124,7 +124,7 @@ Toolkit.run(
       // Call the serializer to construct a string
       .map((item) => serializers[item.type](item));
 
-    const readmeContent = fs.readFileSync("./README.md", "utf-8").split("\n");
+    var readmeContent = fs.readFileSync("./README.md", "utf-8").split("\n");
 
     // Find the indec corresponding to <!--START_SECTION:activity--> comment
     let startIdx = readmeContent.findIndex(
@@ -151,7 +151,7 @@ Toolkit.run(
       tools.log.info("Found less than 5 activities");
     }
 
-    if (startIdx !== -1 && endIdx === -1) {
+    if (startIdx !== -1 && endIdx === -1) { // If there is just a start index
       // Add one since the content needs to be inserted just after the initial comment
       startIdx++;
       content.forEach((line, idx) =>
@@ -189,7 +189,7 @@ Toolkit.run(
     startIdx++;
 
     // Recent GitHub Activity content between the comments
-    const readmeActivitySection = readmeContent.slice(startIdx, endIdx);
+    const readmeActivitySection = readmeContent.slice(startIdx, endIdx+1);
     if (!readmeActivitySection.length) {
       content.some((line, idx) => {
         // User doesn't have 5 public events
