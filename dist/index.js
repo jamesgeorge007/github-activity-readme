@@ -1518,9 +1518,13 @@ const toUrlFormat = (item) => {
 
 const exec = (cmd, args = []) =>
   new Promise((resolve, reject) => {
-    const app = spawn(cmd, args, { stdio: "inherit" });
+    const app = spawn(cmd, args, { stdio: "pipe" });
+    let stdout = "";
+    app.stdout.on("data", (data) => {
+      stdout = data;
+    });
     app.on("close", (code) => {
-      if (code !== 0) {
+      if (code !== 0 && !stdout.includes("nothing to commit")) {
         err = new Error(`Invalid status code: ${code}`);
         err.code = code;
         return reject(err);
