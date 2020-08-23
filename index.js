@@ -36,7 +36,7 @@ const toUrlFormat = (item) => {
 /**
  * Execute shell command
  * @param {String} cmd - root command
- * @param {String[]} args - args to be passed alongwith
+ * @param {String[]} args - args to be passed along with
  *
  * @returns {Promise<void>}
  */
@@ -126,7 +126,7 @@ Toolkit.run(
 
     const readmeContent = fs.readFileSync("./README.md", "utf-8").split("\n");
 
-    // Find the indec corresponding to <!--START_SECTION:activity--> comment
+    // Find the index corresponding to <!--START_SECTION:activity--> comment
     let startIdx = readmeContent.findIndex(
       (content) => content.trim() === "<!--START_SECTION:activity-->"
     );
