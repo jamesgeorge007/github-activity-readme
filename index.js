@@ -126,7 +126,7 @@ Toolkit.run(
 
     const readmeContent = fs.readFileSync("./README.md", "utf-8").split("\n");
 
-    // Find the indec corresponding to <!--START_SECTION:activity--> comment
+    // Find the index corresponding to <!--START_SECTION:activity--> comment
     let startIdx = readmeContent.findIndex(
       (content) => content.trim() === "<!--START_SECTION:activity-->"
     );
