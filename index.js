@@ -144,7 +144,7 @@ Toolkit.run(
     );
 
     if (!content.length) {
-      tools.exit.failure("No pull request/issue/comment on an issue found");
+      tools.exit.failure("No PullRequest/Issue/IssueComment events found");
     }
 
     if (content.length < 5) {
