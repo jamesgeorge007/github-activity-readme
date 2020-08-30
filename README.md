@@ -44,4 +44,29 @@ Please note that only those public events that belong to the following list show
 
 You can find an example [here](https://github.com/jamesgeorge007/jamesgeorge007/blob/master/.github/workflows/update-readme.yml).
 
+### Custom commit message
+
+One can specify a custom commit message with the `COMMIT_MSG` option.
+
+```yml
+name: Update README
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: jamesgeorge007/github-activity-readme@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          COMMIT_MSG: 'Specify a custom commit message'
+```
+
 _Inspired by [JasonEtco/activity-box](https://github.com/JasonEtco/activity-box)_
