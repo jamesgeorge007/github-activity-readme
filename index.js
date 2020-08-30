@@ -6,6 +6,9 @@ const { Toolkit } = require("actions-toolkit");
 
 const MAX_LINES = 5;
 
+// Get config
+const GH_USERNAME = core.getInput("GH_USERNAME");
+const COMMIT_MSG = core.getInput("COMMIT_MSG");
 /**
  * Returns the sentence case representation
  * @param {String} str - the string
@@ -77,7 +80,7 @@ const commitFile = async () => {
   await exec("git", [
     "commit",
     "-m",
-    ":zap: update readme with the recent activity",
+    COMMIT_MSG
   ]);
   await exec("git", ["push"]);
 };
@@ -104,7 +107,6 @@ const serializers = {
 
 Toolkit.run(
   async (tools) => {
-    const GH_USERNAME = core.getInput("USERNAME");
 
     // Get the user's public events
     tools.log.debug(`Getting activity for ${GH_USERNAME}`);
