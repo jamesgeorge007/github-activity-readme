@@ -9,7 +9,7 @@ inputs:
     required: false
   COMMIT_MSG:
     description: "Commit message used while committing to the repo"
-    default: "Update README with the recent activity"
+    default: ":zap: Update README with the recent activity"
     required: false
 
 branding:
