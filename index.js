@@ -77,11 +77,7 @@ const commitFile = async () => {
   ]);
   await exec("git", ["config", "--global", "user.name", "readme-bot"]);
   await exec("git", ["add", "README.md"]);
-  await exec("git", [
-    "commit",
-    "-m",
-    COMMIT_MSG
-  ]);
+  await exec("git", ["commit", "-m", COMMIT_MSG]);
   await exec("git", ["push"]);
 };
 
@@ -107,7 +103,6 @@ const serializers = {
 
 Toolkit.run(
   async (tools) => {
-
     // Get the user's public events
     tools.log.debug(`Getting activity for ${GH_USERNAME}`);
     const events = await tools.github.activity.listPublicEventsForUser({
