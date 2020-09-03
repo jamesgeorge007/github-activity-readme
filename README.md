@@ -46,7 +46,7 @@ You can find an example [here](https://github.com/jamesgeorge007/jamesgeorge007/
 
 ### Custom commit message
 
-One can specify a custom commit message with the `COMMIT_MSG` option.
+Specify a custom commit message with the `COMMIT_MSG` input param.
 
 ```yml
 name: Update README
@@ -59,6 +59,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    name: Update this repo's README with recent activity
 
     steps:
       - uses: actions/checkout@v2
