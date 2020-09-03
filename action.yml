@@ -3,9 +3,14 @@ description: Updates README with the recent GitHub activity of a user
 author: jamesgeorge007
 
 inputs:
-  USERNAME:
+  GH_USERNAME:
     description: 'Your GitHub username'
     default: ${{ github.repository_owner }}
+    required: false
+  COMMIT_MSG:
+    description: "Commit message used while committing to the repo"
+    default: ":zap: Update README with the recent activity"
+    required: false
 
 branding:
   color: yellow
