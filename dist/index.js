@@ -15178,7 +15178,7 @@ const getContent = (tools) => __awaiter(void 0, void 0, void 0, function* () {
                 // Filter out Dependabot PRs (if NO_DEPENDABOT is used)
                 .filter(NO_DEPENDABOT ? dependabotFilter : () => true)
                 // Call the serializer to construct a string
-                .map((item) => serializers[item.type](item))
+                .map((item) => serializers[item.type](item)),
         ];
         // Remove duplicates
         content = [...new Set(content)];
