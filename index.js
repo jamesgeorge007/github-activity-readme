@@ -9,10 +9,6 @@ const MAX_LINES = 5;
 // Get config
 const GH_USERNAME = core.getInput("GH_USERNAME");
 const COMMIT_MSG = core.getInput("COMMIT_MSG");
-const NO_DEPENDABOT = parseBool(
-  core.getInput("NO_DEPENDABOT"),
-  "NO_DEPENDABOT"
-);
 
 /**
  * Returns the sentence case representation
@@ -140,6 +136,11 @@ const serializers = {
 };
 
 const dependabotFilter = (event) => {
+  const NO_DEPENDABOT = parseBool(
+    core.getInput("NO_DEPENDABOT"),
+    "NO_DEPENDABOT"
+  );
+
   // If the user doesn't want to filter out them, or the event is not a PR, ignore the event
   if (!NO_DEPENDABOT || event.type != "PullRequestEvent") return true;
 
