@@ -14992,6 +14992,25 @@ function wrappy (fn, cb) {
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -15005,16 +15024,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core_1 = __importDefault(__webpack_require__(2186));
+const core = __importStar(__webpack_require__(2186));
 const fs_1 = __importDefault(__webpack_require__(5747));
 const child_process_1 = __webpack_require__(3129);
 const actions_toolkit_1 = __webpack_require__(7045);
 // Get config
-const GH_USERNAME = core_1.default.getInput("GH_USERNAME");
-const COMMIT_MSG = core_1.default.getInput("COMMIT_MSG");
-const LINES = parseNumber(core_1.default.getInput('LINES'), 'LINES');
-const NO_COMMIT = parseBool(core_1.default.getInput("NO_COMMIT"), "NO_COMMIT");
-const NO_DEPENDABOT = parseBool(core_1.default.getInput("NO_DEPENDABOT"), "NO_DEPENDABOT");
+const GH_USERNAME = core.getInput("GH_USERNAME");
+const COMMIT_MSG = core.getInput("COMMIT_MSG");
+const LINES = parseNumber(core.getInput("LINES"), "LINES");
+const NO_COMMIT = parseBool(core.getInput("NO_COMMIT"), "NO_COMMIT");
+const NO_DEPENDABOT = parseBool(core.getInput("NO_DEPENDABOT"), "NO_DEPENDABOT");
 /**
  * Returns the sentence case representation
  * @param str - the string
@@ -15145,10 +15164,10 @@ const getEvents = (tools) => __awaiter(void 0, void 0, void 0, function* () {
     let page = 0;
     while (events.length < LINES) {
         // Fetch user activity
-        let { data } = yield tools.github.activity.listPublicEventsForUser({
+        let { data, } = yield tools.github.activity.listPublicEventsForUser({
             username: GH_USERNAME,
             per_page: 100,
-            page
+            page,
         });
         // Stored filtered events
         events = [
@@ -15157,7 +15176,7 @@ const getEvents = (tools) => __awaiter(void 0, void 0, void 0, function* () {
                 // Filter out any boring activity
                 .filter((event) => serializers.hasOwnProperty(event.type))
                 // Filter out Dependabot PRs (if NO_DEPENDABOT is used)
-                .filter(NO_DEPENDABOT ? dependabotFilter : () => true)
+                .filter(NO_DEPENDABOT ? dependabotFilter : () => true),
         ];
         if (data.length < 100)
             break;
