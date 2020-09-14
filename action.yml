@@ -8,8 +8,12 @@ inputs:
     default: ${{ github.repository_owner }}
     required: false
   COMMIT_MSG:
-    description: "Commit message used while committing to the repo"
-    default: ":zap: Update README with the recent activity"
+    description: 'Commit message used while committing to the repo'
+    default: ':zap: Update README with the recent activity'
+    required: false
+  NO_DEPENDABOT:
+    description: 'Whether to filter out PRs opened by Dependabot'
+    default: 'false'
     required: false
 
 branding:

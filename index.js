@@ -9,6 +9,8 @@ const MAX_LINES = 5;
 // Get config
 const GH_USERNAME = core.getInput("GH_USERNAME");
 const COMMIT_MSG = core.getInput("COMMIT_MSG");
+const NO_DEPENDABOT = parseBool(core.getInput("NO_DEPENDABOT"), "NO_DEPENDABOT");
+
 /**
  * Returns the sentence case representation
  * @param {String} str - the string
@@ -17,6 +19,39 @@ const COMMIT_MSG = core.getInput("COMMIT_MSG");
  */
 
 const capitalize = (str) => str.slice(0, 1).toUpperCase() + str.slice(1);
+
+/**
+ * Parses a boolean value
+ * @param {string} str The string to parse
+ * @param {string} [paramName] The name of the input to use in errors
+ * @returns {boolean}
+ */
+
+const parseBool = (str, paramName) => {
+  let parsed
+  try {
+    // Parse the value for the string
+    parsed = JSON.parse(str)
+
+    // If the parsed value is not a boolean, throw
+    if (typeof parsed != 'boolean') throw 'wrong_type'
+    else return parsed
+  } catch (e) {
+    // Throw user-friendly errors
+    if (e === 'wrong_type')
+      throw new Error(
+        paramName
+          ? `The entered ${paramName} is not valid: parsed type is ${typeof parsed}.`
+          : `Parsed type is not valid: ${typeof parsed}.`
+      )
+    else
+      throw new Error(
+        paramName
+          ? `The entered ${paramName} is not valid: cannot parse string ('${str}').`
+          : `Cannot parse string ('${str}').`
+      )
+  }
+}
 
 const urlPrefix = "https://github.com/";
 
@@ -101,6 +136,19 @@ const serializers = {
   },
 };
 
+const dependabotFilter = event => {
+  // If the user doesn't want to filter out them, or the event is not a PR, ignore the event
+  if (!NO_DEPENDABOT || event.type != 'PullRequestEvent') return true
+
+  try {
+    // If the event has the proper structure, ignore it only if the author is not dependabot, otherwise filter it out
+    return event.payload.pull_request.user.login != 'dependabot[bot]'
+  } catch {
+    // If the event doesn't have the proper structure, ignore the event
+    return true
+  }
+}
+
 Toolkit.run(
   async (tools) => {
     // Get the user's public events
@@ -116,6 +164,8 @@ Toolkit.run(
     const content = events.data
       // Filter out any boring activity
       .filter((event) => serializers.hasOwnProperty(event.type))
+      // Filter out Dependabot PRs (if NO_DEPENDABOT is used)
+      .filter(dependabotFilter)
       // We only have five lines to work with
       .slice(0, MAX_LINES)
       // Call the serializer to construct a string
