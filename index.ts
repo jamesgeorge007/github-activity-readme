@@ -250,6 +250,7 @@ Toolkit.run(
         // Commit to the remote repository
         try {
           await commitFile()
+          return tools.exit.success("Pushed to remote repository")
         } catch (err) {
           tools.log.debug("Something went wrong while committing to the repo.")
           return tools.exit.failure(err)
@@ -299,14 +300,16 @@ Toolkit.run(
       // Update README
       fs.writeFileSync("./README.md", readmeContent.join("\n"))
 
-      // Commit to the remote repository
-      try {
-        await commitFile()
-      } catch (err) {
-        tools.log.debug("Something went wrong")
-        return tools.exit.failure(err)
+      if (!NO_COMMIT) {
+        // Commit to the remote repository
+        try {
+          await commitFile()
+          return tools.exit.success("Pushed to remote repository")
+        } catch (err) {
+          tools.log.debug("Something went wrong")
+          return tools.exit.failure(err)
+        }
       }
-      tools.exit.success("Pushed to remote repository")
     }
   },
   {
