@@ -2,14 +2,13 @@ import core from "@actions/core"
 import fs from "fs"
 import { spawn } from "child_process"
 import { Toolkit } from "actions-toolkit"
-import { InputType } from 'actions-toolkit/lib/inputs'
-import { OutputType } from 'actions-toolkit/lib/outputs'
-
+import { InputType } from "actions-toolkit/lib/inputs"
+import { OutputType } from "actions-toolkit/lib/outputs"
 
 // Get config
 const GH_USERNAME = core.getInput("GH_USERNAME")
 const COMMIT_MSG = core.getInput("COMMIT_MSG")
-const LINES = parseNumber(core.getInput('LINES'), 'LINES')
+const LINES = parseNumber(core.getInput("LINES"), "LINES")
 const NO_COMMIT = parseBool(core.getInput("NO_COMMIT"), "NO_COMMIT")
 const NO_DEPENDABOT = parseBool(core.getInput("NO_DEPENDABOT"), "NO_DEPENDABOT")
 
@@ -67,7 +66,6 @@ function parseNumber(str: string, paramName?: string) {
     )
   else return parsed
 }
-
 
 const urlPrefix = "https://github.com/"
 
@@ -165,11 +163,13 @@ const getEvents = async (tools: Toolkit<InputType, OutputType>) => {
   let page = 0
   while (events.length < LINES) {
     // Fetch user activity
-    let { data }: { data: any[] } = await tools.github.activity.listPublicEventsForUser({
+    let {
+      data,
+    }: { data: any[] } = await tools.github.activity.listPublicEventsForUser({
       username: GH_USERNAME,
       per_page: 100,
-      page
-    });
+      page,
+    })
 
     // Stored filtered events
     events = [
@@ -178,7 +178,7 @@ const getEvents = async (tools: Toolkit<InputType, OutputType>) => {
         // Filter out any boring activity
         .filter((event) => serializers.hasOwnProperty(event.type))
         // Filter out Dependabot PRs (if NO_DEPENDABOT is used)
-        .filter(NO_DEPENDABOT ? dependabotFilter : () => true)
+        .filter(NO_DEPENDABOT ? dependabotFilter : () => true),
     ]
 
     if (data.length < 100) break
@@ -190,7 +190,9 @@ const getEvents = async (tools: Toolkit<InputType, OutputType>) => {
   if (events.length == 0)
     tools.exit.failure("No PullRequest/Issue/IssueComment events found")
   if (events.length < LINES)
-    tools.log.debug(`Action was supposed to generate ${LINES} line(s), but there are only ${events.length} eligible events.`)
+    tools.log.debug(
+      `Action was supposed to generate ${LINES} line(s), but there are only ${events.length} eligible events.`
+    )
 
   return events.slice(0, LINES)
 }
