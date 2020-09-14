@@ -18,7 +18,7 @@ jobs:
           message: 'build: update dist'
           add: dist
         env:
-          GITHUB_TOKEN: ${{ secret.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   lint:
     name: Lint source code
@@ -35,4 +35,4 @@ jobs:
           message: 'chore: lint source code'
           add: index.ts
         env:
-          GITHUB_TOKEN: ${{ secret.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
