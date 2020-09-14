@@ -1484,6 +1484,8 @@ const MAX_LINES = 5;
 // Get config
 const GH_USERNAME = core.getInput("GH_USERNAME");
 const COMMIT_MSG = core.getInput("COMMIT_MSG");
+const NO_DEPENDABOT = parseBool(core.getInput("NO_DEPENDABOT"), "NO_DEPENDABOT");
+
 /**
  * Returns the sentence case representation
  * @param {String} str - the string
@@ -1492,6 +1494,39 @@ const COMMIT_MSG = core.getInput("COMMIT_MSG");
  */
 
 const capitalize = (str) => str.slice(0, 1).toUpperCase() + str.slice(1);
+
+/**
+ * Parses a boolean value
+ * @param {string} str The string to parse
+ * @param {string} [paramName] The name of the input to use in errors
+ * @returns {boolean}
+ */
+
+const parseBool = (str, paramName) => {
+  let parsed
+  try {
+    // Parse the value for the string
+    parsed = JSON.parse(str)
+
+    // If the parsed value is not a boolean, throw
+    if (typeof parsed != 'boolean') throw 'wrong_type'
+    else return parsed
+  } catch (e) {
+    // Throw user-friendly errors
+    if (e === 'wrong_type')
+      throw new Error(
+        paramName
+          ? `The entered ${paramName} is not valid: parsed type is ${typeof parsed}.`
+          : `Parsed type is not valid: ${typeof parsed}.`
+      )
+    else
+      throw new Error(
+        paramName
+          ? `The entered ${paramName} is not valid: cannot parse string ('${str}').`
+          : `Cannot parse string ('${str}').`
+      )
+  }
+}
 
 const urlPrefix = "https://github.com/";
 
@@ -1576,6 +1611,19 @@ const serializers = {
   },
 };
 
+const dependabotFilter = event => {
+  // If the user doesn't want to filter out them, or the event is not a PR, ignore the event
+  if (!NO_DEPENDABOT || event.type != 'PullRequestEvent') return true
+
+  try {
+    // If the event has the proper structure, ignore it only if the author is not dependabot, otherwise filter it out
+    return event.payload.pull_request.user.login != 'dependabot[bot]'
+  } catch {
+    // If the event doesn't have the proper structure, ignore the event
+    return true
+  }
+}
+
 Toolkit.run(
   async (tools) => {
     // Get the user's public events
@@ -1591,6 +1639,8 @@ Toolkit.run(
     const content = events.data
       // Filter out any boring activity
       .filter((event) => serializers.hasOwnProperty(event.type))
+      // Filter out Dependabot PRs (if NO_DEPENDABOT is used)
+      .filter(dependabotFilter)
       // We only have five lines to work with
       .slice(0, MAX_LINES)
       // Call the serializer to construct a string
@@ -15326,7 +15376,7 @@ module.exports = options => {
 /***/ 969:
 /***/ (function(module) {
 
-module.exports = {"_from":"signale@^1.4.0","_id":"signale@1.4.0","_inBundle":false,"_integrity":"sha512-iuh+gPf28RkltuJC7W5MRi6XAjTDCAPC/prJUpQoG4vIP3MJZ+GTydVnodXA7pwvTKb2cA0m9OFZW/cdWy/I/w==","_location":"/signale","_phantomChildren":{},"_requested":{"type":"range","registry":true,"raw":"signale@^1.4.0","name":"signale","escapedName":"signale","rawSpec":"^1.4.0","saveSpec":null,"fetchSpec":"^1.4.0"},"_requiredBy":["/actions-toolkit"],"_resolved":"https://registry.npmjs.org/signale/-/signale-1.4.0.tgz","_shasum":"c4be58302fb0262ac00fc3d886a7c113759042f1","_spec":"signale@^1.4.0","_where":"/Users/jamesgeorge007/CodeSpace/scripting/JavaScript/GitHub-Actions/github-activity-readme/node_modules/actions-toolkit","author":{"name":"Klaus Sinani","email":"klaussinani@gmail.com","url":"https://klaussinani.github.io"},"bugs":{"url":"https://github.com/klaussinani/signale/issues"},"bundleDependencies":false,"dependencies":{"chalk":"^2.3.2","figures":"^2.0.0","pkg-conf":"^2.1.0"},"deprecated":false,"description":"👋 Hackable console logger","devDependencies":{"xo":"*"},"engines":{"node":">=6"},"files":["index.js","signale.js","types.js"],"homepage":"https://github.com/klaussinani/signale#readme","keywords":["hackable","colorful","console","logger"],"license":"MIT","maintainers":[{"name":"Mario Sinani","email":"mariosinani@protonmail.ch","url":"https://mariocfhq.github.io"}],"name":"signale","options":{"default":{"displayScope":true,"displayBadge":true,"displayDate":false,"displayFilename":false,"displayLabel":true,"displayTimestamp":false,"underlineLabel":true,"underlineMessage":false,"underlinePrefix":false,"underlineSuffix":false,"uppercaseLabel":false}},"repository":{"type":"git","url":"git+https://github.com/klaussinani/signale.git"},"scripts":{"test":"xo"},"version":"1.4.0","xo":{"space":2}};
+module.exports = {"_args":[["signale@1.4.0","C:\\GitHub\\github-activity-readme"]],"_from":"signale@1.4.0","_id":"signale@1.4.0","_inBundle":false,"_integrity":"sha512-iuh+gPf28RkltuJC7W5MRi6XAjTDCAPC/prJUpQoG4vIP3MJZ+GTydVnodXA7pwvTKb2cA0m9OFZW/cdWy/I/w==","_location":"/signale","_phantomChildren":{},"_requested":{"type":"version","registry":true,"raw":"signale@1.4.0","name":"signale","escapedName":"signale","rawSpec":"1.4.0","saveSpec":null,"fetchSpec":"1.4.0"},"_requiredBy":["/actions-toolkit"],"_resolved":"https://registry.npmjs.org/signale/-/signale-1.4.0.tgz","_spec":"1.4.0","_where":"C:\\GitHub\\github-activity-readme","author":{"name":"Klaus Sinani","email":"klaussinani@gmail.com","url":"https://klaussinani.github.io"},"bugs":{"url":"https://github.com/klaussinani/signale/issues"},"dependencies":{"chalk":"^2.3.2","figures":"^2.0.0","pkg-conf":"^2.1.0"},"description":"👋 Hackable console logger","devDependencies":{"xo":"*"},"engines":{"node":">=6"},"files":["index.js","signale.js","types.js"],"homepage":"https://github.com/klaussinani/signale#readme","keywords":["hackable","colorful","console","logger"],"license":"MIT","maintainers":[{"name":"Mario Sinani","email":"mariosinani@protonmail.ch","url":"https://mariocfhq.github.io"}],"name":"signale","options":{"default":{"displayScope":true,"displayBadge":true,"displayDate":false,"displayFilename":false,"displayLabel":true,"displayTimestamp":false,"underlineLabel":true,"underlineMessage":false,"underlinePrefix":false,"underlineSuffix":false,"uppercaseLabel":false}},"repository":{"type":"git","url":"git+https://github.com/klaussinani/signale.git"},"scripts":{"test":"xo"},"version":"1.4.0","xo":{"space":2}};
 
 /***/ }),
 
