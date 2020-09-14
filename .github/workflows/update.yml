@@ -1,0 +1,38 @@
+name: Update dist & source code
+
+on: push
+
+jobs:
+  build:
+    name: Update dist
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - run: npm run build
+      - uses: EndBug/add-and-commit@v4
+        with:
+          message: 'build: update dist'
+          add: dist
+        env:
+          GITHUB_TOKEN: ${{ secret.GITHUB_TOKEN }}
+
+  lint:
+    name: Lint source code
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - run: npm run format
+      - uses: EndBug/add-and-commit@v4
+        with:
+          message: 'chore: lint source code'
+          add: index.ts
+        env:
+          GITHUB_TOKEN: ${{ secret.GITHUB_TOKEN }}
