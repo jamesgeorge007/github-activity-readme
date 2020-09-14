@@ -180,7 +180,7 @@ const getContent = async (tools: Toolkit<InputType, OutputType>) => {
         // Filter out Dependabot PRs (if NO_DEPENDABOT is used)
         .filter(NO_DEPENDABOT ? dependabotFilter : () => true)
         // Call the serializer to construct a string
-        .map((item) => serializers[item.type](item))
+        .map((item) => serializers[item.type](item)),
     ]
     // Remove duplicates
     content = [...new Set(content)]
