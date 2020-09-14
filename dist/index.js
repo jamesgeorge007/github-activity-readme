@@ -15159,10 +15159,10 @@ const dependabotFilter = (event) => {
         return true;
     }
 };
-const getEvents = (tools) => __awaiter(void 0, void 0, void 0, function* () {
-    let events = [];
+const getContent = (tools) => __awaiter(void 0, void 0, void 0, function* () {
+    let content = [];
     let page = 0;
-    while (events.length < LINES) {
+    while (content.length < LINES) {
         // Fetch user activity
         let { data, } = yield tools.github.activity.listPublicEventsForUser({
             username: GH_USERNAME,
@@ -15170,34 +15170,35 @@ const getEvents = (tools) => __awaiter(void 0, void 0, void 0, function* () {
             page,
         });
         // Stored filtered events
-        events = [
-            ...events,
+        content = [
+            ...content,
             ...data
                 // Filter out any boring activity
                 .filter((event) => serializers.hasOwnProperty(event.type))
                 // Filter out Dependabot PRs (if NO_DEPENDABOT is used)
-                .filter(NO_DEPENDABOT ? dependabotFilter : () => true),
+                .filter(NO_DEPENDABOT ? dependabotFilter : () => true)
+                // Call the serializer to construct a string
+                .map((item) => serializers[item.type](item))
         ];
+        // Remove duplicates
+        content = [...new Set(content)];
         if (data.length < 100)
             break;
         else
             page++;
     }
     tools.log.debug(`${page * 100}+ events inspected.`);
-    if (events.length == 0)
+    if (content.length == 0)
         tools.exit.failure("No PullRequest/Issue/IssueComment events found");
-    if (events.length < LINES)
-        tools.log.debug(`Action was supposed to generate ${LINES} line(s), but there are only ${events.length} eligible events.`);
-    return events.slice(0, LINES);
+    if (content.length < LINES)
+        tools.log.debug(`Action was supposed to generate ${LINES} line(s), but there are only ${content.length} eligible events.`);
+    return content.slice(0, LINES);
 });
 actions_toolkit_1.Toolkit.run((tools) => __awaiter(void 0, void 0, void 0, function* () {
     // Get the user's public events
     tools.log.debug(`Getting activity for ${GH_USERNAME}`);
-    const events = yield getEvents(tools);
-    tools.log.debug(`Activity for ${GH_USERNAME}, ${events.length} events found.`);
-    const content = events
-        // Call the serializer to construct a string
-        .map((item) => serializers[item.type](item));
+    const content = yield getContent(tools);
+    tools.log.debug(`Activity for ${GH_USERNAME}, ${content.length} events found.`);
     const readmeContent = fs_1.default.readFileSync("./README.md", "utf-8").split("\n");
     // Find the index corresponding to <!--START_SECTION:activity--> comment
     let startIdx = readmeContent.findIndex((content) => content.trim() === "<!--START_SECTION:activity-->");
