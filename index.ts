@@ -157,11 +157,11 @@ const dependabotFilter = (event: any) => {
   }
 }
 
-const getEvents = async (tools: Toolkit<InputType, OutputType>) => {
-  let events: any[] = []
+const getContent = async (tools: Toolkit<InputType, OutputType>) => {
+  let content: string[] = []
 
   let page = 0
-  while (events.length < LINES) {
+  while (content.length < LINES) {
     // Fetch user activity
     let {
       data,
@@ -172,14 +172,18 @@ const getEvents = async (tools: Toolkit<InputType, OutputType>) => {
     })
 
     // Stored filtered events
-    events = [
-      ...events,
+    content = [
+      ...content,
       ...data
         // Filter out any boring activity
         .filter((event) => serializers.hasOwnProperty(event.type))
         // Filter out Dependabot PRs (if NO_DEPENDABOT is used)
-        .filter(NO_DEPENDABOT ? dependabotFilter : () => true),
+        .filter(NO_DEPENDABOT ? dependabotFilter : () => true)
+        // Call the serializer to construct a string
+        .map((item) => serializers[item.type](item))
     ]
+    // Remove duplicates
+    content = [...new Set(content)]
 
     if (data.length < 100) break
     else page++
@@ -187,28 +191,24 @@ const getEvents = async (tools: Toolkit<InputType, OutputType>) => {
 
   tools.log.debug(`${page * 100}+ events inspected.`)
 
-  if (events.length == 0)
+  if (content.length == 0)
     tools.exit.failure("No PullRequest/Issue/IssueComment events found")
-  if (events.length < LINES)
+  if (content.length < LINES)
     tools.log.debug(
-      `Action was supposed to generate ${LINES} line(s), but there are only ${events.length} eligible events.`
+      `Action was supposed to generate ${LINES} line(s), but there are only ${content.length} eligible events.`
     )
 
-  return events.slice(0, LINES)
+  return content.slice(0, LINES)
 }
 
 Toolkit.run(
   async (tools) => {
     // Get the user's public events
     tools.log.debug(`Getting activity for ${GH_USERNAME}`)
-    const events = await getEvents(tools)
+    const content = await getContent(tools)
     tools.log.debug(
-      `Activity for ${GH_USERNAME}, ${events.length} events found.`
+      `Activity for ${GH_USERNAME}, ${content.length} events found.`
     )
-
-    const content = events
-      // Call the serializer to construct a string
-      .map((item) => serializers[item.type](item))
 
     const readmeContent = fs.readFileSync("./README.md", "utf-8").split("\n")
 
