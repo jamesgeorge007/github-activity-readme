@@ -15219,6 +15219,7 @@ actions_toolkit_1.Toolkit.run((tools) => __awaiter(void 0, void 0, void 0, funct
             // Commit to the remote repository
             try {
                 yield commitFile();
+                return tools.exit.success("Pushed to remote repository");
             }
             catch (err) {
                 tools.log.debug("Something went wrong while committing to the repo.");
@@ -15264,15 +15265,17 @@ actions_toolkit_1.Toolkit.run((tools) => __awaiter(void 0, void 0, void 0, funct
         }
         // Update README
         fs_1.default.writeFileSync("./README.md", readmeContent.join("\n"));
-        // Commit to the remote repository
-        try {
-            yield commitFile();
+        if (!NO_COMMIT) {
+            // Commit to the remote repository
+            try {
+                yield commitFile();
+                return tools.exit.success("Pushed to remote repository");
+            }
+            catch (err) {
+                tools.log.debug("Something went wrong");
+                return tools.exit.failure(err);
+            }
         }
-        catch (err) {
-            tools.log.debug("Something went wrong");
-            return tools.exit.failure(err);
-        }
-        tools.exit.success("Pushed to remote repository");
     }
 }), {
     event: ["schedule", "workflow_dispatch"],
