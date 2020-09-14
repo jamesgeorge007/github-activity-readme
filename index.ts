@@ -1,4 +1,4 @@
-import core from "@actions/core"
+import * as core from "@actions/core"
 import fs from "fs"
 import { spawn } from "child_process"
 import { Toolkit } from "actions-toolkit"
