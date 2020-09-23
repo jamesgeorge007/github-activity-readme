@@ -41,6 +41,7 @@ Please note that only those public events that belong to the following list show
 - `IssueEvent`
 - `IssueCommentEvent`
 - `PullRequestEvent`
+- `ForkEvent`
 
 You can find an example [here](https://github.com/jamesgeorge007/jamesgeorge007/blob/master/.github/workflows/update-readme.yml).
 

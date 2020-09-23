@@ -1479,7 +1479,7 @@ const path = __webpack_require__(622);
 const { spawn } = __webpack_require__(129);
 const { Toolkit } = __webpack_require__(461);
 
-const MAX_LINES = 5;
+const MAX_LINES = 4;
 
 // Get config
 const GH_USERNAME = core.getInput("GH_USERNAME");
@@ -1493,7 +1493,7 @@ const COMMIT_MSG = core.getInput("COMMIT_MSG");
 
 const capitalize = (str) => str.slice(0, 1).toUpperCase() + str.slice(1);
 
-const urlPrefix = "https://github.com/";
+const urlPrefix = "https://github.com";
 
 /**
  * Returns a URL in markdown format for PR's and issues
@@ -1508,7 +1508,7 @@ const toUrlFormat = (item) => {
       ? `[#${item.payload.issue.number}](${urlPrefix}/${item.repo.name}/issues/${item.payload.issue.number})`
       : `[#${item.payload.pull_request.number}](${urlPrefix}/${item.repo.name}/pull/${item.payload.pull_request.number})`;
   }
-  return `[${item}](${urlPrefix}/${item})`;
+  return `[${item.split("/")[1]}](${urlPrefix}/${item})`;
 };
 
 /**
@@ -1556,23 +1556,28 @@ const commitFile = async () => {
   await exec("git", ["push"]);
 };
 
+// https://developer.github.com/v3/activity/event_types/
 const serializers = {
+  WatchEvent: (item) => {
+    return `💫 Liked ${toUrlFormat(item.repo.name)}</br>`;
+  },
   IssueCommentEvent: (item) => {
-    return `🗣 Commented on ${toUrlFormat(item)} in ${toUrlFormat(
-      item.repo.name
-    )}`;
+    return `🗣 Posted ${toUrlFormat(item)}-${toUrlFormat(item.repo.name)}</br>`;
   },
   IssuesEvent: (item) => {
-    return `❗️ ${capitalize(item.payload.action)} issue ${toUrlFormat(
+    return `❗️ ${capitalize(item.payload.action)} ${toUrlFormat(
       item
-    )} in ${toUrlFormat(item.repo.name)}`;
+    )}-${toUrlFormat(item.repo.name)}</br>`;
   },
   PullRequestEvent: (item) => {
     const emoji = item.payload.action === "opened" ? "💪" : "❌";
     const line = item.payload.pull_request.merged
       ? "🎉 Merged"
       : `${emoji} ${capitalize(item.payload.action)}`;
-    return `${line} PR ${toUrlFormat(item)} in ${toUrlFormat(item.repo.name)}`;
+    return `${line} ${toUrlFormat(item)}-${toUrlFormat(item.repo.name)}</br>`;
+  },
+  ForkEvent: (item) => {
+    return `🍴 Forked ${toUrlFormat(item.repo.name)}</br>`;
   },
 };
 
@@ -1619,15 +1624,15 @@ Toolkit.run(
       tools.exit.failure("No PullRequest/Issue/IssueComment events found");
     }
 
-    if (content.length < 5) {
-      tools.log.info("Found less than 5 activities");
+    if (content.length < 4) {
+      tools.log.info("Found less than 4 activities");
     }
 
     if (startIdx !== -1 && endIdx === -1) {
       // Add one since the content needs to be inserted just after the initial comment
       startIdx++;
       content.forEach((line, idx) =>
-        readmeContent.splice(startIdx + idx, 0, `${idx + 1}. ${line}`)
+        readmeContent.splice(startIdx + idx, 0, `${line}`)
       );
 
       // Append <!--END_SECTION:activity--> comment
@@ -1664,11 +1669,11 @@ Toolkit.run(
     const readmeActivitySection = readmeContent.slice(startIdx, endIdx);
     if (!readmeActivitySection.length) {
       content.some((line, idx) => {
-        // User doesn't have 5 public events
+        // User doesn't have 4 public events
         if (!line) {
           return true;
         }
-        readmeContent.splice(startIdx + idx, 0, `${idx + 1}. ${line}`);
+        readmeContent.splice(startIdx + idx, 0, `${line}`);
       });
       tools.log.success("Wrote to README");
     } else {
@@ -1676,12 +1681,12 @@ Toolkit.run(
       let count = 0;
 
       readmeActivitySection.some((line, idx) => {
-        // User doesn't have 5 public events
+        // User doesn't have 4 public events
         if (!content[count]) {
           return true;
         }
         if (line !== "") {
-          readmeContent[startIdx + idx] = `${count + 1}. ${content[count]}`;
+          readmeContent[startIdx + idx] = `${content[count]}`;
           count++;
         }
       });
@@ -15326,7 +15331,7 @@ module.exports = options => {
 /***/ 969:
 /***/ (function(module) {
 
-module.exports = {"_from":"signale@^1.4.0","_id":"signale@1.4.0","_inBundle":false,"_integrity":"sha512-iuh+gPf28RkltuJC7W5MRi6XAjTDCAPC/prJUpQoG4vIP3MJZ+GTydVnodXA7pwvTKb2cA0m9OFZW/cdWy/I/w==","_location":"/signale","_phantomChildren":{},"_requested":{"type":"range","registry":true,"raw":"signale@^1.4.0","name":"signale","escapedName":"signale","rawSpec":"^1.4.0","saveSpec":null,"fetchSpec":"^1.4.0"},"_requiredBy":["/actions-toolkit"],"_resolved":"https://registry.npmjs.org/signale/-/signale-1.4.0.tgz","_shasum":"c4be58302fb0262ac00fc3d886a7c113759042f1","_spec":"signale@^1.4.0","_where":"/Users/jamesgeorge007/CodeSpace/scripting/JavaScript/GitHub-Actions/github-activity-readme/node_modules/actions-toolkit","author":{"name":"Klaus Sinani","email":"klaussinani@gmail.com","url":"https://klaussinani.github.io"},"bugs":{"url":"https://github.com/klaussinani/signale/issues"},"bundleDependencies":false,"dependencies":{"chalk":"^2.3.2","figures":"^2.0.0","pkg-conf":"^2.1.0"},"deprecated":false,"description":"👋 Hackable console logger","devDependencies":{"xo":"*"},"engines":{"node":">=6"},"files":["index.js","signale.js","types.js"],"homepage":"https://github.com/klaussinani/signale#readme","keywords":["hackable","colorful","console","logger"],"license":"MIT","maintainers":[{"name":"Mario Sinani","email":"mariosinani@protonmail.ch","url":"https://mariocfhq.github.io"}],"name":"signale","options":{"default":{"displayScope":true,"displayBadge":true,"displayDate":false,"displayFilename":false,"displayLabel":true,"displayTimestamp":false,"underlineLabel":true,"underlineMessage":false,"underlinePrefix":false,"underlineSuffix":false,"uppercaseLabel":false}},"repository":{"type":"git","url":"git+https://github.com/klaussinani/signale.git"},"scripts":{"test":"xo"},"version":"1.4.0","xo":{"space":2}};
+module.exports = {"_args":[["signale@1.4.0","/Users/ayyazakhtar/Workspace/aakhtar3/github-activity-readme"]],"_from":"signale@1.4.0","_id":"signale@1.4.0","_inBundle":false,"_integrity":"sha512-iuh+gPf28RkltuJC7W5MRi6XAjTDCAPC/prJUpQoG4vIP3MJZ+GTydVnodXA7pwvTKb2cA0m9OFZW/cdWy/I/w==","_location":"/signale","_phantomChildren":{},"_requested":{"type":"version","registry":true,"raw":"signale@1.4.0","name":"signale","escapedName":"signale","rawSpec":"1.4.0","saveSpec":null,"fetchSpec":"1.4.0"},"_requiredBy":["/actions-toolkit"],"_resolved":"https://registry.npmjs.org/signale/-/signale-1.4.0.tgz","_spec":"1.4.0","_where":"/Users/ayyazakhtar/Workspace/aakhtar3/github-activity-readme","author":{"name":"Klaus Sinani","email":"klaussinani@gmail.com","url":"https://klaussinani.github.io"},"bugs":{"url":"https://github.com/klaussinani/signale/issues"},"dependencies":{"chalk":"^2.3.2","figures":"^2.0.0","pkg-conf":"^2.1.0"},"description":"👋 Hackable console logger","devDependencies":{"xo":"*"},"engines":{"node":">=6"},"files":["index.js","signale.js","types.js"],"homepage":"https://github.com/klaussinani/signale#readme","keywords":["hackable","colorful","console","logger"],"license":"MIT","maintainers":[{"name":"Mario Sinani","email":"mariosinani@protonmail.ch","url":"https://mariocfhq.github.io"}],"name":"signale","options":{"default":{"displayScope":true,"displayBadge":true,"displayDate":false,"displayFilename":false,"displayLabel":true,"displayTimestamp":false,"underlineLabel":true,"underlineMessage":false,"underlinePrefix":false,"underlineSuffix":false,"uppercaseLabel":false}},"repository":{"type":"git","url":"git+https://github.com/klaussinani/signale.git"},"scripts":{"test":"xo"},"version":"1.4.0","xo":{"space":2}};
 
 /***/ }),
 

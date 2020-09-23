@@ -4,7 +4,7 @@ const path = require("path");
 const { spawn } = require("child_process");
 const { Toolkit } = require("actions-toolkit");
 
-const MAX_LINES = 5;
+const MAX_LINES = 4;
 
 // Get config
 const GH_USERNAME = core.getInput("GH_USERNAME");
@@ -18,7 +18,7 @@ const COMMIT_MSG = core.getInput("COMMIT_MSG");
 
 const capitalize = (str) => str.slice(0, 1).toUpperCase() + str.slice(1);
 
-const urlPrefix = "https://github.com/";
+const urlPrefix = "https://github.com";
 
 /**
  * Returns a URL in markdown format for PR's and issues
@@ -33,7 +33,7 @@ const toUrlFormat = (item) => {
       ? `[#${item.payload.issue.number}](${urlPrefix}/${item.repo.name}/issues/${item.payload.issue.number})`
       : `[#${item.payload.pull_request.number}](${urlPrefix}/${item.repo.name}/pull/${item.payload.pull_request.number})`;
   }
-  return `[${item}](${urlPrefix}/${item})`;
+  return `[${item.split("/")[1]}](${urlPrefix}/${item})`;
 };
 
 /**
@@ -81,23 +81,28 @@ const commitFile = async () => {
   await exec("git", ["push"]);
 };
 
+// https://developer.github.com/v3/activity/event_types/
 const serializers = {
+  WatchEvent: (item) => {
+    return `💫 Liked ${toUrlFormat(item.repo.name)}</br>`;
+  },
   IssueCommentEvent: (item) => {
-    return `🗣 Commented on ${toUrlFormat(item)} in ${toUrlFormat(
-      item.repo.name
-    )}`;
+    return `🗣 Posted ${toUrlFormat(item)}-${toUrlFormat(item.repo.name)}</br>`;
   },
   IssuesEvent: (item) => {
-    return `❗️ ${capitalize(item.payload.action)} issue ${toUrlFormat(
+    return `❗️ ${capitalize(item.payload.action)} ${toUrlFormat(
       item
-    )} in ${toUrlFormat(item.repo.name)}`;
+    )}-${toUrlFormat(item.repo.name)}</br>`;
   },
   PullRequestEvent: (item) => {
     const emoji = item.payload.action === "opened" ? "💪" : "❌";
     const line = item.payload.pull_request.merged
       ? "🎉 Merged"
       : `${emoji} ${capitalize(item.payload.action)}`;
-    return `${line} PR ${toUrlFormat(item)} in ${toUrlFormat(item.repo.name)}`;
+    return `${line} ${toUrlFormat(item)}-${toUrlFormat(item.repo.name)}</br>`;
+  },
+  ForkEvent: (item) => {
+    return `🍴 Forked ${toUrlFormat(item.repo.name)}</br>`;
   },
 };
 
@@ -144,15 +149,15 @@ Toolkit.run(
       tools.exit.failure("No PullRequest/Issue/IssueComment events found");
     }
 
-    if (content.length < 5) {
-      tools.log.info("Found less than 5 activities");
+    if (content.length < 4) {
+      tools.log.info("Found less than 4 activities");
     }
 
     if (startIdx !== -1 && endIdx === -1) {
       // Add one since the content needs to be inserted just after the initial comment
       startIdx++;
       content.forEach((line, idx) =>
-        readmeContent.splice(startIdx + idx, 0, `${idx + 1}. ${line}`)
+        readmeContent.splice(startIdx + idx, 0, `${line}`)
       );
 
       // Append <!--END_SECTION:activity--> comment
@@ -189,11 +194,11 @@ Toolkit.run(
     const readmeActivitySection = readmeContent.slice(startIdx, endIdx);
     if (!readmeActivitySection.length) {
       content.some((line, idx) => {
-        // User doesn't have 5 public events
+        // User doesn't have 4 public events
         if (!line) {
           return true;
         }
-        readmeContent.splice(startIdx + idx, 0, `${idx + 1}. ${line}`);
+        readmeContent.splice(startIdx + idx, 0, `${line}`);
       });
       tools.log.success("Wrote to README");
     } else {
@@ -201,12 +206,12 @@ Toolkit.run(
       let count = 0;
 
       readmeActivitySection.some((line, idx) => {
-        // User doesn't have 5 public events
+        // User doesn't have 4 public events
         if (!content[count]) {
           return true;
         }
         if (line !== "") {
-          readmeContent[startIdx + idx] = `${count + 1}. ${content[count]}`;
+          readmeContent[startIdx + idx] = `${content[count]}`;
           count++;
         }
       });
