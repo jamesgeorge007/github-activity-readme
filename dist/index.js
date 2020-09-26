@@ -15082,7 +15082,7 @@ function parseNumber(str, paramName) {
     else
         return parsed;
 }
-const urlPrefix = "https://github.com/";
+const urlPrefix = "https://github.com";
 /**
  * Returns a URL in markdown format for PR's and issues
  * @param item Holds information concerning the issue/PR

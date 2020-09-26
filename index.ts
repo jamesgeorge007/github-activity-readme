@@ -67,7 +67,7 @@ function parseNumber(str: string, paramName?: string) {
   else return parsed
 }
 
-const urlPrefix = "https://github.com/"
+const urlPrefix = "https://github.com"
 
 /**
  * Returns a URL in markdown format for PR's and issues
