@@ -44,9 +44,11 @@ Please note that only those public events that belong to the following list show
 
 You can find an example [here](https://github.com/jamesgeorge007/jamesgeorge007/blob/master/.github/workflows/update-readme.yml).
 
-### Custom commit message
+### Custom commit message or custom maximum number of populated lines
 
 Specify a custom commit message with the `COMMIT_MSG` input param.
+
+Specify a custom maximum number of lines with the `MAX_LINES` input param *(default is 5)*.
 
 ```yml
 name: Update README
@@ -68,6 +70,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           COMMIT_MSG: 'Specify a custom commit message'
+          MAX_LINES: 10
 ```
 
 _Inspired by [JasonEtco/activity-box](https://github.com/JasonEtco/activity-box)_
