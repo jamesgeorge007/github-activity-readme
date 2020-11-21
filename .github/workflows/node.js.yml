@@ -1,10 +1,10 @@
-name: Test
+name: CI
 
 on: [push, pull_request]
 
 jobs:
   build:
-    name: Test
+    name: Generate build and check code formatting
 
     runs-on: ubuntu-latest
 
