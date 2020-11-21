@@ -1,22 +1,32 @@
 {
   "name": "github-activity-readme",
-  "version": "0.3.6",
+  "version": "0.3.1",
   "description": "Updates README with the recent GitHub activity of a user",
   "main": "index.js",
   "keywords": [],
   "author": "James George",
   "license": "MIT",
   "scripts": {
-    "format:check": "prettier --check index.js",
-    "format": "prettier --write index.js",
-    "build": "ncc build index.js -o dist"
+    "format:check": "prettier --check index.ts",
+    "format": "prettier --write index.ts",
+    "format:add": "npm run format && git add index.ts",
+    "build": "ncc build index.ts -o dist",
+    "build:add": "npm run build && git add dist"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run format:add && npm run build:add"
+    }
   },
   "dependencies": {
-    "@actions/core": "^1.2.6",
+    "@actions/core": "^1.2.4",
     "actions-toolkit": "^5.0.0"
   },
   "devDependencies": {
-    "@zeit/ncc": "^0.22.3",
-    "prettier": "^2.0.5"
+    "@types/node": "^14.10.1",
+    "@vercel/ncc": "^0.24.1",
+    "husky": "^4.3.0",
+    "prettier": "^2.0.5",
+    "typescript": "^4.0.2"
   }
 }

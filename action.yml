@@ -3,17 +3,25 @@ description: Updates README with the recent GitHub activity of a user
 author: jamesgeorge007
 
 inputs:
+  COMMIT_MSG:
+    description: 'Commit message used while committing to the repo'
+    default: ':zap: Update README with the recent activity'
+    required: false
   GH_USERNAME:
     description: 'Your GitHub username'
     default: ${{ github.repository_owner }}
     required: false
-  COMMIT_MSG:
-    description: "Commit message used while committing to the repo"
-    default: ":zap: Update README with the recent activity"
-    required: false
   MAX_LINES:
-    description: "The maximum number of lines populated in your readme file"
-    default: 5
+    description: The number of lines to generate
+    default: '5'
+    required: false
+  NO_COMMIT:
+    description: Whether not to commit the changed README
+    default: 'false'
+    required: false
+  NO_DEPENDABOT:
+    description: Whether to filter out PRs opened by Dependabot
+    default: 'false'
     required: false
 
 branding:
