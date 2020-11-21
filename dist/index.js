@@ -15124,7 +15124,7 @@ const commitFile = () => __awaiter(void 0, void 0, void 0, function* () {
         "config",
         "--global",
         "user.email",
-        "readme-bot@example.com",
+        "41898282+github-actions[bot]@users.noreply.github.com",
     ]);
     yield exec("git", ["config", "--global", "user.name", "readme-bot"]);
     yield exec("git", ["add", "README.md"]);
