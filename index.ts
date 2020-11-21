@@ -8,7 +8,7 @@ import { OutputType } from "actions-toolkit/lib/outputs"
 // Get config
 const GH_USERNAME = core.getInput("GH_USERNAME")
 const COMMIT_MSG = core.getInput("COMMIT_MSG")
-const LINES = parseNumber(core.getInput("LINES"), "LINES")
+const MAX_LINES = parseNumber(core.getInput("MAX_LINES"), "MAX_LINES")
 const NO_COMMIT = parseBool(core.getInput("NO_COMMIT"), "NO_COMMIT")
 const NO_DEPENDABOT = parseBool(core.getInput("NO_DEPENDABOT"), "NO_DEPENDABOT")
 
@@ -161,7 +161,7 @@ const getContent = async (tools: Toolkit<InputType, OutputType>) => {
   let content: string[] = []
 
   let page = 0
-  while (content.length < LINES) {
+  while (content.length < MAX_LINES) {
     // Fetch user activity
     let {
       data,
@@ -193,12 +193,12 @@ const getContent = async (tools: Toolkit<InputType, OutputType>) => {
 
   if (content.length == 0)
     tools.exit.failure("No PullRequest/Issue/IssueComment events found")
-  if (content.length < LINES)
+  if (content.length < MAX_LINES)
     tools.log.debug(
-      `Action was supposed to generate ${LINES} line(s), but there are only ${content.length} eligible events.`
+      `Action was supposed to generate ${MAX_LINES} line(s), but there are only ${content.length} eligible events.`
     )
 
-  return content.slice(0, LINES)
+  return content.slice(0, MAX_LINES)
 }
 
 Toolkit.run(

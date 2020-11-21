@@ -11,7 +11,7 @@ inputs:
     description: 'Your GitHub username'
     default: ${{ github.repository_owner }}
     required: false
-  LINES:
+  MAX_LINES:
     description: The number of lines to generate
     default: '5'
     required: false
