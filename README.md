@@ -44,9 +44,15 @@ Please note that only those public events that belong to the following list show
 
 You can find an example [here](https://github.com/jamesgeorge007/jamesgeorge007/blob/master/.github/workflows/update-readme.yml).
 
-### Custom commit message
+### Override defaults
 
-Specify a custom commit message with the `COMMIT_MSG` input param.
+Use the following `input params` to customize it for your use case:-
+
+| Input Param | Default Value | Description |
+|--------|--------|--------|
+| `COMMIT_MSG` | :zap: Update README with the recent activity | Commit message used while committing to the repo |
+| `MAX_LINES` | 5 | The maximum number of lines populated in your readme file |
+
 
 ```yml
 name: Update README
@@ -68,6 +74,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           COMMIT_MSG: 'Specify a custom commit message'
+          MAX_LINES: 10
 ```
 
 _Inspired by [JasonEtco/activity-box](https://github.com/JasonEtco/activity-box)_
