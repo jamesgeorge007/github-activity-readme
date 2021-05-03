@@ -140,7 +140,9 @@ Toolkit.run(
     );
 
     if (!content.length) {
-      tools.exit.failure("No PullRequest/Issue/IssueComment events found");
+      tools.exit.success(
+        "No new PullRequest/Issue/IssueComment events found. Leaving README unchanged with previous activity."
+      );
     }
 
     if (content.length < 5) {
