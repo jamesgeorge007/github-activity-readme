@@ -8,6 +8,7 @@ const { Toolkit } = require("actions-toolkit");
 const GH_USERNAME = core.getInput("GH_USERNAME");
 const COMMIT_MSG = core.getInput("COMMIT_MSG");
 const MAX_LINES = core.getInput("MAX_LINES");
+const README_FILE = core.getInput("README_FILE");
 /**
  * Returns the sentence case representation
  * @param {String} str - the string
@@ -75,7 +76,7 @@ const commitFile = async () => {
     "41898282+github-actions[bot]@users.noreply.github.com",
   ]);
   await exec("git", ["config", "--global", "user.name", "readme-bot"]);
-  await exec("git", ["add", "README.md"]);
+  await exec("git", ["add", README_FILE]);
   await exec("git", ["commit", "-m", COMMIT_MSG]);
   await exec("git", ["push"]);
 };
@@ -162,7 +163,7 @@ Toolkit.run(
       );
 
       // Update README
-      fs.writeFileSync("./README.md", readmeContent.join("\n"));
+      fs.writeFileSync(README_FILE, readmeContent.join("\n"));
 
       // Commit to the remote repository
       try {
