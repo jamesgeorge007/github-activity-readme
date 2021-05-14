@@ -16,17 +16,14 @@ Updates `README.md` with the recent GitHub activity of a user.
 
 ```yml
 name: Update README
-
 on:
   schedule:
     - cron: '*/30 * * * *'
   workflow_dispatch:
-
 jobs:
   build:
     runs-on: ubuntu-latest
     name: Update this repo's README with recent activity
-
     steps:
       - uses: actions/checkout@v2
       - uses: jamesgeorge007/github-activity-readme@master
@@ -50,23 +47,22 @@ Use the following `input params` to customize it for your use case:-
 
 | Input Param | Default Value | Description |
 |--------|--------|--------|
+| `COMMIT_NAME` | readme-bot | Name of the committer |
+| `COMMIT_EMAIL` | 41898282+github-actions[bot]@users.noreply.github.com | Email of the committer |
 | `COMMIT_MSG` | :zap: Update README with the recent activity | Commit message used while committing to the repo |
 | `MAX_LINES` | 5 | The maximum number of lines populated in your readme file |
 
 
 ```yml
 name: Update README
-
 on:
   schedule:
     - cron: '*/30 * * * *'
   workflow_dispatch:
-
 jobs:
   build:
     runs-on: ubuntu-latest
     name: Update this repo's README with recent activity
-
     steps:
       - uses: actions/checkout@v2
       - uses: jamesgeorge007/github-activity-readme@master
@@ -75,6 +71,7 @@ jobs:
         with:
           COMMIT_MSG: 'Specify a custom commit message'
           MAX_LINES: 10
+          COMMIT_NAME: GitHub Activity Readme
 ```
 
 _Inspired by [JasonEtco/activity-box](https://github.com/JasonEtco/activity-box)_
