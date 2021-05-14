@@ -11,6 +11,14 @@ inputs:
     description: "Commit message used while committing to the repo"
     default: ":zap: Update README with the recent activity"
     required: false
+  COMMIT_NAME: 
+    description: "Name of the committer"
+    default: "readme-bot"
+    required: false
+  COMMIT_EMAIL:
+    description: "Email of the committer"
+    default: "41898282+github-actions[bot]@users.noreply.github.com"
+    required: false
   MAX_LINES:
     description: "The maximum number of lines populated in your readme file"
     default: 5
