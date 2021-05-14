@@ -4,8 +4,16 @@ author: jamesgeorge007
 
 inputs:
   GH_USERNAME:
-    description: 'Your GitHub username'
+    description: "Your GitHub username"
     default: ${{ github.repository_owner }}
+    required: false
+  COMMIT_NAME:
+    description: "Name of the committer"
+    default: "github-actions[bot]"
+    required: false
+  COMMIT_EMAIL:
+    description: "Email of the committer"
+    default: "41898282+github-actions[bot]@users.noreply.github.com"
     required: false
   COMMIT_MSG:
     description: "Commit message used while committing to the repo"

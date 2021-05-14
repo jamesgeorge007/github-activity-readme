@@ -1789,9 +1789,11 @@ const { Toolkit } = __webpack_require__(461);
 
 // Get config
 const GH_USERNAME = core.getInput("GH_USERNAME");
+const COMMIT_NAME = core.getInput("COMMIT_NAME");
+const COMMIT_EMAIL = core.getInput("COMMIT_EMAIL");
 const COMMIT_MSG = core.getInput("COMMIT_MSG");
 const MAX_LINES = core.getInput("MAX_LINES");
-const TARGET_FILE = core.getInput("TARGET_FILE") || "README.md";
+const TARGET_FILE = core.getInput("TARGET_FILE");
 
 /**
  * Returns the sentence case representation
@@ -1853,13 +1855,8 @@ const exec = (cmd, args = []) =>
  */
 
 const commitFile = async () => {
-  await exec("git", [
-    "config",
-    "--global",
-    "user.email",
-    "41898282+github-actions[bot]@users.noreply.github.com",
-  ]);
-  await exec("git", ["config", "--global", "user.name", "readme-bot"]);
+  await exec("git", ["config", "--global", "user.email", COMMIT_EMAIL]);
+  await exec("git", ["config", "--global", "user.name", COMMIT_NAME]);
   await exec("git", ["add", TARGET_FILE]);
   await exec("git", ["commit", "-m", COMMIT_MSG]);
   await exec("git", ["push"]);
