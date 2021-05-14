@@ -32,7 +32,7 @@ const toUrlFormat = (item) => {
   if (typeof item === "object") {
     return Object.hasOwnProperty.call(item.payload, "issue")
       ? `[#${item.payload.issue.number}](${urlPrefix}/${item.repo.name}/issues/${item.payload.issue.number})`
-      : `[#${item.payload.pull_request.number}](${urlPrefix}/${item.repo.name}/pull/${item.payload.pull_request.number})`;
+      : `[#${item.payload.pull_request.number}](${urlPrefix}/${item.repo.name}/pull/${item.payload.pull_request.number})`;   
   }
   return `[${item}](${urlPrefix}/${item})`;
 };
@@ -70,12 +70,7 @@ const exec = (cmd, args = []) =>
  */
 
 const commitFile = async () => {
-  await exec("git", [
-    "config",
-    "--global",
-    "user.email",
-    COMMIT_EMAIL,
-  ]);
+  await exec("git", ["config", "--global", "user.email", COMMIT_EMAIL]);
   await exec("git", ["config", "--global", "user.name", COMMIT_NAME]);
   await exec("git", ["add", "README.md"]);
   await exec("git", ["commit", "-m", COMMIT_MSG]);
