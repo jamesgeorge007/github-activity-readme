@@ -16,12 +16,10 @@ Updates `README.md` with the recent GitHub activity of a user.
 
 ```yml
 name: Update README
-
 on:
   schedule:
     - cron: "*/30 * * * *"
   workflow_dispatch:
-
 jobs:
   build:
     name: Update this repo's README with recent activity
@@ -51,20 +49,20 @@ You can find an example [here](https://github.com/jamesgeorge007/jamesgeorge007/
 
 Use the following `input params` to customize it for your use case:-
 
-| Input Param   | Default Value                                | Description                                               |
-| ------------- | -------------------------------------------- | --------------------------------------------------------- |
-| `COMMIT_MSG`  | :zap: Update README with the recent activity | Commit message used while committing to the repo          |
-| `MAX_LINES`   | 5                                            | The maximum number of lines populated in your readme file |
-| `TARGET_FILE` | README.md                                    | The file to insert recent activity into                   |
+| Input Param    | Default Value                                         | Description                                               |
+| -------------- | ----------------------------------------------------- | --------------------------------------------------------- |
+| `COMMIT_NAME`  | github-actions[bot]                                   | Name of the committer                                     |
+| `COMMIT_EMAIL` | 41898282+github-actions[bot]@users.noreply.github.com | Email of the committer                                    |
+| `COMMIT_MSG`   | :zap: Update README with the recent activity          | Commit message used while committing to the repo          |
+| `MAX_LINES`    | 5                                                     | The maximum number of lines populated in your readme file |
+| `TARGET_FILE`  | README.md                                             | The file to insert recent activity into                   |
 
 ```yml
 name: Update README
-
 on:
   schedule:
     - cron: "*/30 * * * *"
   workflow_dispatch:
-
 jobs:
   build:
     name: Update this repo's README with recent activity
@@ -80,6 +78,7 @@ jobs:
         with:
           COMMIT_MSG: "Specify a custom commit message"
           MAX_LINES: 10
+          COMMIT_NAME: GitHub Activity Readme
 ```
 
 _Inspired by [JasonEtco/activity-box](https://github.com/JasonEtco/activity-box)_
