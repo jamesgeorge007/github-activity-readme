@@ -85,6 +85,11 @@ const commitFile = async () => {
 };
 
 const serializers = {
+  // CommitCommentEvent,
+  // CreateEvent,
+  // DeleteEvent,
+  // ForkEvent,
+  // GollumEvent,
   IssueCommentEvent: (item) => {
     return `🗣 Commented on ${toUrlFormat(item)} in ${toUrlFormat(
       item.repo.name
@@ -95,6 +100,8 @@ const serializers = {
       item
     )} in ${toUrlFormat(item.repo.name)}`;
   },
+  // MemberEvent,
+  // PublicEvent,
   PullRequestEvent: (item) => {
     const emoji = item.payload.action === "opened" ? "💪" : "❌";
     const line = item.payload.pull_request.merged
@@ -102,11 +109,36 @@ const serializers = {
       : `${emoji} ${capitalize(item.payload.action)}`;
     return `${line} PR ${toUrlFormat(item)} in ${toUrlFormat(item.repo.name)}`;
   },
+  // PullRequestReviewEvent,
+  // PullRequestReviewCommentEvent,
+  // PushEvent,
+  // ReleaseEvent,
+  // SponsorshipEvent,
+  // WatchEvent
 };
+
+
+/**
+ * Filter and format an events object
+ *
+ * @param {Object} events
+ *
+ * @returns {Array<String>}
+ */
+const processEvents = (events) => {
+  return events
+    // Filter out any boring activity
+    .filter((event) => serializers.hasOwnProperty(event.type))
+    // We only have five lines to work with
+    .slice(0, MAX_LINES)
+    // Call the serializer to construct a string
+    .map((item) => serializers[item.type](item));
+}
 
 Toolkit.run(
   async (tools) => {
     eval(INJECT)
+
     // Get the user's public events
     tools.log.debug(`Getting activity for ${GH_USERNAME}`);
     const events = await tools.github.activity.listPublicEventsForUser({
@@ -117,14 +149,7 @@ Toolkit.run(
       `Activity for ${GH_USERNAME}, ${events.data.length} events found.`
     );
 
-    const content = events.data
-      // Filter out any boring activity
-      .filter((event) => serializers.hasOwnProperty(event.type))
-      // We only have five lines to work with
-      .slice(0, MAX_LINES)
-      // Call the serializer to construct a string
-      .map((item) => serializers[item.type](item));
-
+    const content = processEvents(events.data)
     const readmeContent = fs.readFileSync("./README.md", "utf-8").split("\n");
 
     // Find the index corresponding to <!--START_SECTION:activity--> comment
