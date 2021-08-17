@@ -16,7 +16,7 @@ inputs:
     default: 5
     required: false
   INJECT:
-    description: "JavaScript to inject at the begining of Toolkit.run, refer to source code for more information"
+    description: "Path to JavaScript, to inject at the begining of Toolkit.run, refer to source code for more information"
     default: false
     required: false
   SECTION_NAME:

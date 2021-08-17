@@ -140,7 +140,7 @@ const processEvents = (events) => {
 
 Toolkit.run(
   async (tools) => {
-    eval(INJECT);
+    if (INJECT) require(INJECT);
 
     // Get the user's public events
     tools.log.debug(`Getting activity for ${GH_USERNAME}`);
