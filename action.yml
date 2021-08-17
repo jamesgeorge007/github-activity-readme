@@ -22,6 +22,7 @@ inputs:
   SECTION_NAME:
     description: "Defines where to put the content. eg `activity` would put it between <!--START_SECTION:activity--> and <!--END_SECTION:activity-->"
     default: "activity"
+    required: false
 
 branding:
   color: yellow
