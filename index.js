@@ -8,7 +8,9 @@ const { Toolkit } = require("actions-toolkit");
 const GH_USERNAME = core.getInput("GH_USERNAME");
 const COMMIT_MSG = core.getInput("COMMIT_MSG");
 const MAX_LINES = core.getInput("MAX_LINES");
+const SECTION_NAME = core.getInput("SECTION_NAME");
 const INJECT = code.getInput("INJECT")
+
 
 /**
  * Returns the sentence case representation
@@ -127,19 +129,19 @@ Toolkit.run(
 
     // Find the index corresponding to <!--START_SECTION:activity--> comment
     let startIdx = readmeContent.findIndex(
-      (content) => content.trim() === "<!--START_SECTION:activity-->"
+      (content) => content.trim() === `<!--START_SECTION:${SECTION_NAME}-->`
     );
 
     // Early return in case the <!--START_SECTION:activity--> comment was not found
     if (startIdx === -1) {
       return tools.exit.failure(
-        `Couldn't find the <!--START_SECTION:activity--> comment. Exiting!`
+        `Couldn't find the <!--START_SECTION:${SECTION_NAME}--> comment. Exiting!`
       );
     }
 
     // Find the index corresponding to <!--END_SECTION:activity--> comment
     const endIdx = readmeContent.findIndex(
-      (content) => content.trim() === "<!--END_SECTION:activity-->"
+      (content) => content.trim() === `<!--END_SECTION:${SECTION_NAME}-->`
     );
 
     if (!content.length) {
@@ -161,7 +163,7 @@ Toolkit.run(
       readmeContent.splice(
         startIdx + content.length,
         0,
-        "<!--END_SECTION:activity-->"
+        `<!--END_SECTION:${SECTION_NAME}-->`
       );
 
       // Update README

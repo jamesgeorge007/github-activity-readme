@@ -15,11 +15,13 @@ inputs:
     description: "The maximum number of lines populated in your readme file"
     default: 5
     required: false
-
   INJECT:
     description: "JavaScript to inject at the begining of Toolkit.run, refer to source code for more information"
     default: false
     required: false
+  SECTION_NAME:
+    description: "Defines where to put the content. eg `activity` would put it between <!--START_SECTION:activity--> and <!--END_SECTION:activity-->"
+    default: "activity"
 
 branding:
   color: yellow
