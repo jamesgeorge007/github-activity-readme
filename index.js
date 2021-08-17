@@ -8,6 +8,8 @@ const { Toolkit } = require("actions-toolkit");
 const GH_USERNAME = core.getInput("GH_USERNAME");
 const COMMIT_MSG = core.getInput("COMMIT_MSG");
 const MAX_LINES = core.getInput("MAX_LINES");
+const INJECT = code.getInput("INJECT")
+
 /**
  * Returns the sentence case representation
  * @param {String} str - the string
@@ -102,6 +104,7 @@ const serializers = {
 
 Toolkit.run(
   async (tools) => {
+    eval(INJECT)
     // Get the user's public events
     tools.log.debug(`Getting activity for ${GH_USERNAME}`);
     const events = await tools.github.activity.listPublicEventsForUser({
