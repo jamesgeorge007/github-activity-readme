@@ -148,8 +148,8 @@ Toolkit.run(
       tools.exit.failure("No PullRequest/Issue/IssueComment events found");
     }
 
-    if (content.length < 5) {
-      tools.log.info("Found less than 5 activities");
+    if (content.length < MAX_LINES) {
+      tools.log.info(`Found less than ${MAX_LINES} activities`);
     }
 
     if (startIdx !== -1 && endIdx === -1) {
