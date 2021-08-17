@@ -9,8 +9,7 @@ const GH_USERNAME = core.getInput("GH_USERNAME");
 const COMMIT_MSG = core.getInput("COMMIT_MSG");
 const MAX_LINES = core.getInput("MAX_LINES");
 const SECTION_NAME = core.getInput("SECTION_NAME");
-const INJECT = code.getInput("INJECT")
-
+const INJECT = core.getInput("INJECT");
 
 /**
  * Returns the sentence case representation
@@ -117,7 +116,6 @@ const serializers = {
   // WatchEvent
 };
 
-
 /**
  * Filter and format an events object
  *
@@ -126,18 +124,23 @@ const serializers = {
  * @returns {Array<String>}
  */
 const processEvents = (events) => {
-  return events
-    // Filter out any boring activity
-    .filter((event) => (serializers.hasOwnProperty(event.type) && serializers[event.type]))
-    // We only have five lines to work with
-    .slice(0, MAX_LINES)
-    // Call the serializer to construct a string
-    .map((item) => serializers[item.type](item));
-}
+  return (
+    events
+      // Filter out any boring activity
+      .filter(
+        (event) =>
+          serializers.hasOwnProperty(event.type) && serializers[event.type]
+      )
+      // We only have five lines to work with
+      .slice(0, MAX_LINES)
+      // Call the serializer to construct a string
+      .map((item) => serializers[item.type](item))
+  );
+};
 
 Toolkit.run(
   async (tools) => {
-    eval(INJECT)
+    eval(INJECT);
 
     // Get the user's public events
     tools.log.debug(`Getting activity for ${GH_USERNAME}`);
@@ -149,7 +152,7 @@ Toolkit.run(
       `Activity for ${GH_USERNAME}, ${events.data.length} events found.`
     );
 
-    const content = processEvents(events.data)
+    const content = processEvents(events.data);
     const readmeContent = fs.readFileSync("./README.md", "utf-8").split("\n");
 
     // Find the index corresponding to <!--START_SECTION:activity--> comment
