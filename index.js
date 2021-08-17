@@ -128,7 +128,7 @@ const serializers = {
 const processEvents = (events) => {
   return events
     // Filter out any boring activity
-    .filter((event) => serializers.hasOwnProperty(event.type))
+    .filter((event) => (serializers.hasOwnProperty(event.type) && serializers[event.type]))
     // We only have five lines to work with
     .slice(0, MAX_LINES)
     // Call the serializer to construct a string
