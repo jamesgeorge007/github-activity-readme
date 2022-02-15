@@ -9,7 +9,7 @@ inputs:
     required: false
   USE_MARKDOWN:
     description: "True to use markdown, false for HTML"
-    default: true
+    default: "true"
     required: false
   COMMIT_MSG:
     description: "Commit message used while committing to the repo"

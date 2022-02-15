@@ -28,14 +28,14 @@ const urlPrefix = "https://github.com";
  */
 
 const toUrlFormat = (item) => {
-  if (USE_MARKDOWN) {
+  if (USE_MARKDOWN === "true") {
     if (typeof item === "object") {
       return Object.hasOwnProperty.call(item.payload, "issue")
         ? `[#${item.payload.issue.number}](${urlPrefix}/${item.repo.name}/issues/${item.payload.issue.number})`
           : `[#${item.payload.pull_request.number}](${urlPrefix}/${item.repo.name}/pull/${item.payload.pull_request.number})`;
     }
     return `[${item}](${urlPrefix}/${item})`;
-  } else{
+  } else {
       if (typeof item === "object") {
           return Object.hasOwnProperty.call(item.payload, "issue")
               ? `<a href="${urlPrefix}/${item.repo.name}/issues/${item.payload.issue.number}">#${item.payload.issue.number}</a>`
