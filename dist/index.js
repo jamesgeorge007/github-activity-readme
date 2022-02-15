@@ -1481,6 +1481,7 @@ const { Toolkit } = __webpack_require__(461);
 
 // Get config
 const GH_USERNAME = core.getInput("GH_USERNAME");
+const USE_MARKDOWN = core.getInput("USE_MARKDOWN");
 const COMMIT_MSG = core.getInput("COMMIT_MSG");
 const MAX_LINES = core.getInput("MAX_LINES");
 /**
@@ -1502,12 +1503,21 @@ const urlPrefix = "https://github.com";
  */
 
 const toUrlFormat = (item) => {
-  if (typeof item === "object") {
-    return Object.hasOwnProperty.call(item.payload, "issue")
-      ? `[#${item.payload.issue.number}](${urlPrefix}/${item.repo.name}/issues/${item.payload.issue.number})`
-      : `[#${item.payload.pull_request.number}](${urlPrefix}/${item.repo.name}/pull/${item.payload.pull_request.number})`;
-  }
-  return `[${item}](${urlPrefix}/${item})`;
+    if (USE_MARKDOWN) {
+        if (typeof item === "object") {
+            return Object.hasOwnProperty.call(item.payload, "issue")
+                ? `[#${item.payload.issue.number}](${urlPrefix}/${item.repo.name}/issues/${item.payload.issue.number})`
+                : `[#${item.payload.pull_request.number}](${urlPrefix}/${item.repo.name}/pull/${item.payload.pull_request.number})`;
+        }
+        return `[${item}](${urlPrefix}/${item})`;
+    } else{
+        if (typeof item === "object") {
+            return Object.hasOwnProperty.call(item.payload, "issue")
+                ? `<a href="${urlPrefix}/${item.repo.name}/issues/${item.payload.issue.number}">#${item.payload.issue.number}</a>`
+                : `<a href="${urlPrefix}/${item.repo.name}/pull/${item.payload.pull_request.number}">#${item.payload.pull_request.number}</a>`;
+        }
+        return `<a href="${urlPrefix}/${item}">${item}</a>`;
+    }
 };
 
 /**

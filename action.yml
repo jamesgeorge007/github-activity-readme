@@ -7,6 +7,10 @@ inputs:
     description: 'Your GitHub username'
     default: ${{ github.repository_owner }}
     required: false
+  USE_MARKDOWN:
+    description: "True to use markdown, false for HTML"
+    default: true
+    required: false
   COMMIT_MSG:
     description: "Commit message used while committing to the repo"
     default: ":zap: Update README with the recent activity"
