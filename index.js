@@ -130,7 +130,9 @@ Toolkit.run(
       // Call the serializer to construct a string
       .map((item) => serializers[item.type](item));
 
-    const readmeContent = fs.readFileSync(`./${TARGET_FILE}`, "utf-8").split("\n");
+    const readmeContent = fs
+      .readFileSync(`./${TARGET_FILE}`, "utf-8")
+      .split("\n");
 
     // Find the index corresponding to <!--START_SECTION:activity--> comment
     let startIdx = readmeContent.findIndex(
