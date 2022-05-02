@@ -1791,6 +1791,8 @@ const { Toolkit } = __webpack_require__(461);
 const GH_USERNAME = core.getInput("GH_USERNAME");
 const COMMIT_MSG = core.getInput("COMMIT_MSG");
 const MAX_LINES = core.getInput("MAX_LINES");
+const TARGET_FILE = core.getInput("TARGET_FILE") || "README.md";
+
 /**
  * Returns the sentence case representation
  * @param {String} str - the string
@@ -1858,7 +1860,7 @@ const commitFile = async () => {
     "41898282+github-actions[bot]@users.noreply.github.com",
   ]);
   await exec("git", ["config", "--global", "user.name", "readme-bot"]);
-  await exec("git", ["add", "README.md"]);
+  await exec("git", ["add", TARGET_FILE]);
   await exec("git", ["commit", "-m", COMMIT_MSG]);
   await exec("git", ["push"]);
 };
@@ -1911,7 +1913,9 @@ Toolkit.run(
       // Call the serializer to construct a string
       .map((item) => serializers[item.type](item));
 
-    const readmeContent = fs.readFileSync("./README.md", "utf-8").split("\n");
+    const readmeContent = fs
+      .readFileSync(`./${TARGET_FILE}`, "utf-8")
+      .split("\n");
 
     // Find the index corresponding to <!--START_SECTION:activity--> comment
     let startIdx = readmeContent.findIndex(
@@ -1955,7 +1959,7 @@ Toolkit.run(
       );
 
       // Update README
-      fs.writeFileSync("./README.md", readmeContent.join("\n"));
+      fs.writeFileSync(`./${TARGET_FILE}`, readmeContent.join("\n"));
 
       // Commit to the remote repository
       try {
@@ -1987,7 +1991,7 @@ Toolkit.run(
         }
         readmeContent.splice(startIdx + idx, 0, `${idx + 1}. ${line}`);
       });
-      tools.log.success("Wrote to README");
+      tools.log.success(`Wrote to ${TARGET_FILE}`);
     } else {
       // It is likely that a newline is inserted after the <!--START_SECTION:activity--> comment (code formatter)
       let count = 0;
@@ -2002,11 +2006,11 @@ Toolkit.run(
           count++;
         }
       });
-      tools.log.success("Updated README with the recent activity");
+      tools.log.success(`Updated ${TARGET_FILE} with the recent activity`);
     }
 
     // Update README
-    fs.writeFileSync("./README.md", readmeContent.join("\n"));
+    fs.writeFileSync(`./${TARGET_FILE}`, readmeContent.join("\n"));
 
     // Commit to the remote repository
     try {
