@@ -12,7 +12,7 @@
     "build": "ncc build index.js -o dist"
   },
   "dependencies": {
-    "@actions/core": "^1.2.6",
+    "@actions/core": "^1.9.1",
     "actions-toolkit": "^5.0.0"
   },
   "devDependencies": {
