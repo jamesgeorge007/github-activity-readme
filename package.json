@@ -1,7 +1,10 @@
 {
   "name": "github-activity-readme",
   "version": "0.3.6",
-  "description": "Updates README with the recent GitHub activity of a user",
+  "engines" : { 
+    "npm" : ">=8.0.0",
+    "node" : ">=16.0.0"
+  },
   "main": "index.js",
   "keywords": [],
   "author": "James George",
