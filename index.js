@@ -98,6 +98,13 @@ const serializers = {
       : `${emoji} ${capitalize(item.payload.action)}`;
     return `${line} PR ${toUrlFormat(item)} in ${toUrlFormat(item.repo.name)}`;
   },
+  ReleaseEvent: (item) => {
+    return `🚀 ${capitalize(item.payload.action)} release ${toUrlFormat(
+      item.payload.release.name
+        ? item.payload.release.name
+        : item.payload.release.tag_name
+    )} in ${toUrlFormat(item.repo.name)}`;
+  },
 };
 
 Toolkit.run(
@@ -140,7 +147,7 @@ Toolkit.run(
     );
 
     if (!content.length) {
-      tools.exit.success("No PullRequest/Issue/IssueComment events found. Leaving README unchanged with previous activity");
+      tools.exit.success("No PullRequest/Issue/IssueComment/Release events found. Leaving README unchanged with previous activity");
     }
 
     if (content.length < 5) {
