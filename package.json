@@ -9,7 +9,7 @@
   "scripts": {
     "format:check": "prettier --check index.js",
     "format": "prettier --write index.js",
-    "build": "export NODE_OPTIONS=--openssl-legacy-provider && ncc build index.js -o dist"
+    "build": "ncc build index.js -o dist"
   },
   "dependencies": {
     "@actions/core": "^1.2.6",
