@@ -24,8 +24,10 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
     name: Update this repo's README with recent activity
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - uses: actions/checkout@v3
@@ -64,8 +66,10 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
     name: Update this repo's README with recent activity
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - uses: actions/checkout@v3
