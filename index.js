@@ -98,6 +98,13 @@ const serializers = {
       : `${emoji} ${capitalize(item.payload.action)}`;
     return `${line} PR ${toUrlFormat(item)} in ${toUrlFormat(item.repo.name)}`;
   },
+  ReleaseEvent: (item) => {
+    return `🚀 ${capitalize(item.payload.action)} release ${toUrlFormat(
+      item.payload.release.name
+        ? item.payload.release.name
+        : item.payload.release.tag_name
+    )} in ${toUrlFormat(item.repo.name)}`;
+  },
 };
 
 Toolkit.run(
@@ -140,7 +147,9 @@ Toolkit.run(
     );
 
     if (!content.length) {
-      tools.exit.failure("No PullRequest/Issue/IssueComment events found");
+      tools.exit.failure(
+        "No PullRequest/Issue/IssueComment/Release events found"
+      );
     }
 
     if (content.length < 5) {
