@@ -8,7 +8,7 @@ const { Toolkit } = require("actions-toolkit");
 const GH_USERNAME = core.getInput("GH_USERNAME");
 const COMMIT_MSG = core.getInput("COMMIT_MSG");
 const MAX_LINES = core.getInput("MAX_LINES");
-const TARGET_FILE = core.getInput("TARGET_FILE") || "README.md";
+const TARGET_FILE = core.getInput("TARGET_FILE");
 
 /**
  * Returns the sentence case representation
