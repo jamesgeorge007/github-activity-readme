@@ -87,7 +87,8 @@ const serializers = {
     )}`;
   },
   IssuesEvent: (item) => {
-    return `❗️ ${capitalize(item.payload.action)} issue ${toUrlFormat(
+    const emoji = item.payload.action === "opened" ? "❗" : "🔒";
+    return `${emoji} ${capitalize(item.payload.action)} issue ${toUrlFormat(
       item
     )} in ${toUrlFormat(item.repo.name)}`;
   },
