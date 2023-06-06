@@ -44,6 +44,13 @@ const toUrlFormat = (item) => {
   if (Object.hasOwnProperty.call(item.payload, "pull_request")) {
     return `[#${item.payload.pull_request.number}](${item.payload.pull_request.html_url})`;
   }
+
+  if (Object.hasOwnProperty.call(item.payload, "release")) {
+    const release = item.payload.release.name
+      ? item.payload.release.name
+      : item.payload.release.tag_name;
+    return `[${release}](${item.payload.release.html_url})`;
+  }
 };
 
 /**
@@ -107,9 +114,7 @@ const serializers = {
   },
   ReleaseEvent: (item) => {
     return `🚀 ${capitalize(item.payload.action)} release ${toUrlFormat(
-      item.payload.release.name
-        ? item.payload.release.name
-        : item.payload.release.tag_name
+      item
     )} in ${toUrlFormat(item.repo.name)}`;
   },
 };
