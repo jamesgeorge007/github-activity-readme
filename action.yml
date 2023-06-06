@@ -4,12 +4,19 @@ author: jamesgeorge007
 
 inputs:
   GH_USERNAME:
-    description: 'Your GitHub username'
+    description: "Your GitHub username"
     default: ${{ github.repository_owner }}
     required: false
   HTML_ENCODING:
     description: "True to use HTML Encoding, false for Markdown"
     default: "false"
+  COMMIT_NAME:
+    description: "Name of the committer"
+    default: "github-actions[bot]"
+    required: false
+  COMMIT_EMAIL:
+    description: "Email of the committer"
+    default: "41898282+github-actions[bot]@users.noreply.github.com"
     required: false
   COMMIT_MSG:
     description: "Commit message used while committing to the repo"
@@ -19,11 +26,14 @@ inputs:
     description: "The maximum number of lines populated in your readme file"
     default: 5
     required: false
-
+  TARGET_FILE:
+    description: "The file location to write changes to"
+    default: "README.md"
+    required: false
 branding:
   color: yellow
   icon: activity
 
 runs:
-  using: node12
+  using: node16
   main: dist/index.js
