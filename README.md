@@ -50,7 +50,7 @@ Use the following `input params` to customize it for your use case:-
 
 | Input Param    | Default Value                               | Description |
 |----------------|---------------------------------------------|--------|
-| `USE_MARKDOWN` | "true"                                      | True to use markdown, false for HTML |
+| `HTML_ENCODING` | "false"                                      | True to use HTML Encoding, false for Markdown |
 | `COMMIT_MSG`   | :zap: Update README with the recent activity | Commit message used while committing to the repo |
 | `MAX_LINES`    | 5                                           | The maximum number of lines populated in your readme file |
 
@@ -74,7 +74,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          USE_MARKDOWN: "false"
+          HTML_ENCODING: "false"
           COMMIT_MSG: 'Specify a custom commit message'
           MAX_LINES: 10
 ```

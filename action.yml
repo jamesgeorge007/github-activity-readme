@@ -7,9 +7,9 @@ inputs:
     description: 'Your GitHub username'
     default: ${{ github.repository_owner }}
     required: false
-  USE_MARKDOWN:
-    description: "True to use markdown, false for HTML"
-    default: "true"
+  HTML_ENCODING:
+    description: "True to use HTML Encoding, false for Markdown"
+    default: "false"
     required: false
   COMMIT_MSG:
     description: "Commit message used while committing to the repo"

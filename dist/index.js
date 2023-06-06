@@ -1481,7 +1481,7 @@ const { Toolkit } = __webpack_require__(461);
 
 // Get config
 const GH_USERNAME = core.getInput("GH_USERNAME");
-const USE_MARKDOWN = core.getInput("USE_MARKDOWN");
+const HTML_ENCODING = core.getInput("HTML_ENCODING");
 const COMMIT_MSG = core.getInput("COMMIT_MSG");
 const MAX_LINES = core.getInput("MAX_LINES");
 /**
@@ -1503,7 +1503,7 @@ const urlPrefix = "https://github.com";
  */
 
 const toUrlFormat = (item) => {
-    if (USE_MARKDOWN === "true") {
+    if (HTML_ENCODING === "false") {
         if (typeof item === "object") {
             return Object.hasOwnProperty.call(item.payload, "issue")
                 ? `[#${item.payload.issue.number}](${urlPrefix}/${item.repo.name}/issues/${item.payload.issue.number})`
