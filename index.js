@@ -7,12 +7,8 @@ const { Toolkit } = require("actions-toolkit");
 // Get config
 const GH_USERNAME = core.getInput("GH_USERNAME");
 const HTML_ENCODING = core.getInput("HTML_ENCODING");
-const COMMIT_NAME = core.getInput("COMMIT_NAME");
-const COMMIT_EMAIL = core.getInput("COMMIT_EMAIL");
 const COMMIT_MSG = core.getInput("COMMIT_MSG");
 const MAX_LINES = core.getInput("MAX_LINES");
-const TARGET_FILE = core.getInput("TARGET_FILE");
-
 /**
  * Returns the sentence case representation
  * @param {String} str - the string
@@ -82,9 +78,14 @@ const exec = (cmd, args = []) =>
  */
 
 const commitFile = async () => {
-  await exec("git", ["config", "--global", "user.email", COMMIT_EMAIL]);
-  await exec("git", ["config", "--global", "user.name", COMMIT_NAME]);
-  await exec("git", ["add", TARGET_FILE]);
+  await exec("git", [
+    "config",
+    "--global",
+    "user.email",
+    "41898282+github-actions[bot]@users.noreply.github.com",
+  ]);
+  await exec("git", ["config", "--global", "user.name", "readme-bot"]);
+  await exec("git", ["add", "README.md"]);
   await exec("git", ["commit", "-m", COMMIT_MSG]);
   await exec("git", ["push"]);
 };
@@ -96,8 +97,7 @@ const serializers = {
     )}`;
   },
   IssuesEvent: (item) => {
-    const emoji = item.payload.action === "opened" ? "❗" : "🔒";
-    return `${emoji} ${capitalize(item.payload.action)} issue ${toUrlFormat(
+    return `❗️ ${capitalize(item.payload.action)} issue ${toUrlFormat(
       item
     )} in ${toUrlFormat(item.repo.name)}`;
   },
@@ -107,13 +107,6 @@ const serializers = {
       ? "🎉 Merged"
       : `${emoji} ${capitalize(item.payload.action)}`;
     return `${line} PR ${toUrlFormat(item)} in ${toUrlFormat(item.repo.name)}`;
-  },
-  ReleaseEvent: (item) => {
-    return `🚀 ${capitalize(item.payload.action)} release ${toUrlFormat(
-      item.payload.release.name
-        ? item.payload.release.name
-        : item.payload.release.tag_name
-    )} in ${toUrlFormat(item.repo.name)}`;
   },
 };
 
@@ -137,9 +130,7 @@ Toolkit.run(
       // Call the serializer to construct a string
       .map((item) => serializers[item.type](item));
 
-    const readmeContent = fs
-      .readFileSync(`./${TARGET_FILE}`, "utf-8")
-      .split("\n");
+    const readmeContent = fs.readFileSync("./README.md", "utf-8").split("\n");
 
     // Find the index corresponding to <!--START_SECTION:activity--> comment
     let startIdx = readmeContent.findIndex(
@@ -159,9 +150,7 @@ Toolkit.run(
     );
 
     if (!content.length) {
-      tools.exit.success(
-        "No PullRequest/Issue/IssueComment/Release events found. Leaving README unchanged with previous activity"
-      );
+      tools.exit.failure("No PullRequest/Issue/IssueComment events found");
     }
 
     if (content.length < 5) {
@@ -183,7 +172,7 @@ Toolkit.run(
       );
 
       // Update README
-      fs.writeFileSync(`./${TARGET_FILE}`, readmeContent.join("\n"));
+      fs.writeFileSync("./README.md", readmeContent.join("\n"));
 
       // Commit to the remote repository
       try {
@@ -215,7 +204,7 @@ Toolkit.run(
         }
         readmeContent.splice(startIdx + idx, 0, `${idx + 1}. ${line}`);
       });
-      tools.log.success(`Wrote to ${TARGET_FILE}`);
+      tools.log.success("Wrote to README");
     } else {
       // It is likely that a newline is inserted after the <!--START_SECTION:activity--> comment (code formatter)
       let count = 0;
@@ -230,11 +219,11 @@ Toolkit.run(
           count++;
         }
       });
-      tools.log.success(`Updated ${TARGET_FILE} with the recent activity`);
+      tools.log.success("Updated README with the recent activity");
     }
 
     // Update README
-    fs.writeFileSync(`./${TARGET_FILE}`, readmeContent.join("\n"));
+    fs.writeFileSync("./README.md", readmeContent.join("\n"));
 
     // Commit to the remote repository
     try {
