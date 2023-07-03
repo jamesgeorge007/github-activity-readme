@@ -141,7 +141,7 @@ Toolkit.run(
       } catch (err) {
         // Catch any HTTP errors. Especially because the API pagination is
         // limited and throws an error when reaching the end
-        tools.log.info(err);
+        tools.log.info(err.message);
         break;
       }
 
@@ -231,10 +231,9 @@ Toolkit.run(
     try {
       await commitFile();
     } catch (err) {
-      tools.log.debug("Something went wrong");
-      return tools.exit.failure(err);
+      return tools.exit.failure(err.message);
     }
-    tools.exit.success("Wrote to README");
+    tools.exit.success("Pushed update to repository.");
   },
   {
     event: ["schedule", "workflow_dispatch"],
