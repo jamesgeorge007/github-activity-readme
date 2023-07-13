@@ -1804,8 +1804,6 @@ const TARGET_FILE = core.getInput("TARGET_FILE");
 
 const capitalize = (str) => str.slice(0, 1).toUpperCase() + str.slice(1);
 
-const urlPrefix = "https://github.com";
-
 /**
  * Returns a URL in markdown format for PR's and issues
  * @param {Object | String} item - holds information concerning the issue/PR
@@ -1814,12 +1812,28 @@ const urlPrefix = "https://github.com";
  */
 
 const toUrlFormat = (item) => {
-  if (typeof item === "object") {
-    return Object.hasOwnProperty.call(item.payload, "issue")
-      ? `[#${item.payload.issue.number}](${urlPrefix}/${item.repo.name}/issues/${item.payload.issue.number})`
-      : `[#${item.payload.pull_request.number}](${urlPrefix}/${item.repo.name}/pull/${item.payload.pull_request.number})`;
+  if (typeof item !== "object") {
+    return `[${item}](https://github.com/${item})`;
   }
-  return `[${item}](${urlPrefix}/${item})`;
+
+  if (Object.hasOwnProperty.call(item.payload, "comment")) {
+    return `[#${item.payload.issue.number}](${item.payload.comment.html_url})`;
+  }
+
+  if (Object.hasOwnProperty.call(item.payload, "issue")) {
+    return `[#${item.payload.issue.number}](${item.payload.issue.html_url})`;
+  }
+
+  if (Object.hasOwnProperty.call(item.payload, "pull_request")) {
+    return `[#${item.payload.pull_request.number}](${item.payload.pull_request.html_url})`;
+  }
+
+  if (Object.hasOwnProperty.call(item.payload, "release")) {
+    const release = item.payload.release.name
+      ? item.payload.release.name
+      : item.payload.release.tag_name;
+    return `[${release}](${item.payload.release.html_url})`;
+  }
 };
 
 /**
@@ -1883,32 +1897,63 @@ const serializers = {
   },
   ReleaseEvent: (item) => {
     return `🚀 ${capitalize(item.payload.action)} release ${toUrlFormat(
-      item.payload.release.name
-        ? item.payload.release.name
-        : item.payload.release.tag_name
+      item
     )} in ${toUrlFormat(item.repo.name)}`;
   },
 };
 
 Toolkit.run(
   async (tools) => {
-    // Get the user's public events
     tools.log.debug(`Getting activity for ${GH_USERNAME}`);
-    const events = await tools.github.activity.listPublicEventsForUser({
-      username: GH_USERNAME,
-      per_page: 100,
-    });
-    tools.log.debug(
-      `Activity for ${GH_USERNAME}, ${events.data.length} events found.`
-    );
 
-    const content = events.data
-      // Filter out any boring activity
-      .filter((event) => serializers.hasOwnProperty(event.type))
-      // We only have five lines to work with
-      .slice(0, MAX_LINES)
-      // Call the serializer to construct a string
-      .map((item) => serializers[item.type](item));
+    let page = 1;
+    let events = [];
+
+    while (events.length < MAX_LINES) {
+      let data = [];
+
+      try {
+        // Get the user's public events
+        const resp = await tools.github.activity.listPublicEventsForUser({
+          username: GH_USERNAME,
+          per_page: 100,
+          page: page,
+        });
+
+        data = resp.data;
+      } catch (err) {
+        // Catch any HTTP errors. Especially because the API pagination is
+        // limited and throws an error when reaching the end
+        tools.log.info(err.message);
+        break;
+      }
+
+      events = [
+        ...events,
+        ...data
+          // Filter out any boring activity
+          .filter((event) => serializers.hasOwnProperty(event.type))
+          // We only have five lines to work with
+          .slice(0, MAX_LINES)
+          // Call the serializer to construct a string
+          .map((item) => serializers[item.type](item)),
+      ];
+
+      // Remove duplicates
+      events = [...new Set(events)];
+
+      // Break out of the loop if we have enough events
+      if (events.length >= MAX_LINES) {
+        events = events.slice(0, MAX_LINES);
+        break;
+      }
+
+      page++;
+    }
+
+    tools.log.debug(
+      `Activity for ${GH_USERNAME}: ${events.length} relevant events found.`
+    );
 
     const readmeContent = fs
       .readFileSync(`./${TARGET_FILE}`, "utf-8")
@@ -1916,7 +1961,7 @@ Toolkit.run(
 
     // Find the index corresponding to <!--START_SECTION:activity--> comment
     let startIdx = readmeContent.findIndex(
-      (content) => content.trim() === "<!--START_SECTION:activity-->"
+      (line) => line.trim() === "<!--START_SECTION:activity-->"
     );
 
     // Early return in case the <!--START_SECTION:activity--> comment was not found
@@ -1928,83 +1973,39 @@ Toolkit.run(
 
     // Find the index corresponding to <!--END_SECTION:activity--> comment
     const endIdx = readmeContent.findIndex(
-      (content) => content.trim() === "<!--END_SECTION:activity-->"
+      (line) => line.trim() === "<!--END_SECTION:activity-->"
     );
 
-    if (!content.length) {
-      tools.exit.success(
+    if (!events.length) {
+      return tools.exit.success(
         "No PullRequest/Issue/IssueComment/Release events found. Leaving README unchanged with previous activity"
       );
     }
 
-    if (content.length < 5) {
-      tools.log.info("Found less than 5 activities");
+    // Remove all lines between <!--START_SECTION:activity--> and <!--END_SECTION:activity--> comment
+    if (endIdx !== -1) {
+      readmeContent.splice(startIdx + 1, endIdx - startIdx);
     }
 
-    if (startIdx !== -1 && endIdx === -1) {
-      // Add one since the content needs to be inserted just after the initial comment
-      startIdx++;
-      content.forEach((line, idx) =>
-        readmeContent.splice(startIdx + idx, 0, `${idx + 1}. ${line}`)
+    if (events.length < MAX_LINES) {
+      tools.log.info(
+        `Found ${events.length} activities. Which is less than ${MAX_LINES} specified by MAX_LINES.`
       );
-
-      // Append <!--END_SECTION:activity--> comment
-      readmeContent.splice(
-        startIdx + content.length,
-        0,
-        "<!--END_SECTION:activity-->"
-      );
-
-      // Update README
-      fs.writeFileSync(`./${TARGET_FILE}`, readmeContent.join("\n"));
-
-      // Commit to the remote repository
-      try {
-        await commitFile();
-      } catch (err) {
-        tools.log.debug("Something went wrong");
-        return tools.exit.failure(err);
-      }
-      tools.exit.success("Wrote to README");
     }
-
-    const oldContent = readmeContent.slice(startIdx + 1, endIdx).join("\n");
-    const newContent = content
-      .map((line, idx) => `${idx + 1}. ${line}`)
-      .join("\n");
-
-    if (oldContent.trim() === newContent.trim())
-      tools.exit.success("No changes detected");
 
     startIdx++;
 
-    // Recent GitHub Activity content between the comments
-    const readmeActivitySection = readmeContent.slice(startIdx, endIdx);
-    if (!readmeActivitySection.length) {
-      content.some((line, idx) => {
-        // User doesn't have 5 public events
-        if (!line) {
-          return true;
-        }
-        readmeContent.splice(startIdx + idx, 0, `${idx + 1}. ${line}`);
-      });
-      tools.log.success(`Wrote to ${TARGET_FILE}`);
-    } else {
-      // It is likely that a newline is inserted after the <!--START_SECTION:activity--> comment (code formatter)
-      let count = 0;
+    // Append new content
+    events.forEach((line, idx) =>
+      readmeContent.splice(startIdx + idx, 0, `${idx + 1}. ${line}`)
+    );
 
-      readmeActivitySection.some((line, idx) => {
-        // User doesn't have 5 public events
-        if (!content[count]) {
-          return true;
-        }
-        if (line !== "") {
-          readmeContent[startIdx + idx] = `${count + 1}. ${content[count]}`;
-          count++;
-        }
-      });
-      tools.log.success(`Updated ${TARGET_FILE} with the recent activity`);
-    }
+    // Append <!--END_SECTION:activity--> comment
+    readmeContent.splice(
+      startIdx + events.length,
+      0,
+      "<!--END_SECTION:activity-->"
+    );
 
     // Update README
     fs.writeFileSync(`./${TARGET_FILE}`, readmeContent.join("\n"));
@@ -2013,10 +2014,9 @@ Toolkit.run(
     try {
       await commitFile();
     } catch (err) {
-      tools.log.debug("Something went wrong");
-      return tools.exit.failure(err);
+      return tools.exit.failure(err.message);
     }
-    tools.exit.success("Pushed to remote repository");
+    tools.exit.success("Pushed update to repository.");
   },
   {
     event: ["schedule", "workflow_dispatch"],
