@@ -94,7 +94,20 @@ const serializers = {
     )}`;
   },
   IssuesEvent: (item) => {
-    const emoji = item.payload.action === "opened" ? "❗" : "🔒";
+    let emoji = "";
+
+    switch (item.payload.action) {
+      case "opened":
+        emoji = "❗";
+        break;
+      case "reopened":
+        emoji = "🔓";
+        break;
+      case "closed":
+        emoji = "🔒";
+        break;
+    }
+
     return `${emoji} ${capitalize(item.payload.action)} issue ${toUrlFormat(
       item
     )} in ${toUrlFormat(item.repo.name)}`;
