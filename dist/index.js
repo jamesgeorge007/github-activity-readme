@@ -1840,20 +1840,31 @@ const toUrlFormat = (item) => {
 
 const exec = (cmd, args = []) =>
   new Promise((resolve, reject) => {
-    const app = spawn(cmd, args, { stdio: "pipe" });
+    const app = spawn(cmd, args);
+
     let stdout = "";
-    app.stdout.on("data", (data) => {
-      stdout = data;
-    });
+    if (app.stdout) {
+      app.stdout.on("data", (data) => {
+        stdout += data.toString();
+      });
+    }
+
+    let stderr = "";
+    if (app.stderr) {
+      app.stderr.on("data", (data) => {
+        stderr += data.toString();
+      });
+    }
+
     app.on("close", (code) => {
       if (code !== 0 && !stdout.includes("nothing to commit")) {
-        err = new Error(`Invalid status code: ${code}`);
-        err.code = code;
-        return reject(err);
+        return reject({ code, message: stderr });
       }
-      return resolve(code);
+
+      return resolve({ code, stdout });
     });
-    app.on("error", reject);
+
+    app.on("error", () => reject({ code: 1, message: stderr }));
   });
 
 /**
@@ -1981,8 +1992,7 @@ Toolkit.run(
       try {
         await commitFile();
       } catch (err) {
-        tools.log.debug("Something went wrong");
-        return tools.exit.failure(err);
+        return tools.exit.failure(err.message);
       }
       tools.exit.success("Wrote to README");
     }
@@ -2032,8 +2042,7 @@ Toolkit.run(
     try {
       await commitFile();
     } catch (err) {
-      tools.log.debug("Something went wrong");
-      return tools.exit.failure(err);
+      return tools.exit.failure(err.message);
     }
     tools.exit.success("Pushed to remote repository");
   },
