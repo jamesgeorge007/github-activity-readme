@@ -75,13 +75,13 @@ const exec = (cmd, args = []) =>
 
     app.on("close", (code) => {
       if (code !== 0 && !stdout.includes("nothing to commit")) {
-        return reject({ code, message: stderr });
+        return reject({ code, stderr });
       }
 
-      return resolve({ code, stdout });
+      return resolve();
     });
 
-    app.on("error", () => reject({ code: 1, message: stderr }));
+    app.on("error", () => reject({ code: 1, stderr }));
   });
 
 /**
@@ -209,7 +209,8 @@ Toolkit.run(
       try {
         await commitFile();
       } catch (err) {
-        return tools.exit.failure(err.message);
+        const message = `Exit code: ${err.code}\n${err.stderr}`;
+        return tools.exit.failure(message);
       }
       tools.exit.success("Wrote to README");
     }
@@ -259,7 +260,8 @@ Toolkit.run(
     try {
       await commitFile();
     } catch (err) {
-      return tools.exit.failure(err.message);
+      const message = `Exit code: ${err.code}\n${err.stderr}`;
+      return tools.exit.failure(message);
     }
     tools.exit.success("Pushed to remote repository");
   },
