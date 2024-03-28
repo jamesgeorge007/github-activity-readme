@@ -1,6 +1,5 @@
 const core = require("@actions/core");
 const fs = require("fs");
-const path = require("path");
 const { spawn } = require("child_process");
 const { Toolkit } = require("actions-toolkit");
 
@@ -11,6 +10,7 @@ const COMMIT_EMAIL = core.getInput("COMMIT_EMAIL");
 const COMMIT_MSG = core.getInput("COMMIT_MSG");
 const MAX_LINES = core.getInput("MAX_LINES");
 const TARGET_FILE = core.getInput("TARGET_FILE");
+const EMPTY_COMMIT_MSG = core.getInput("EMPTY_COMMIT_MSG");
 
 /**
  * Returns the sentence case representation
@@ -75,13 +75,12 @@ const exec = (cmd, args = []) =>
 
     app.on("close", (code) => {
       if (code !== 0 && !stdout.includes("nothing to commit")) {
-        return reject({ code, stderr });
+        return reject(new Error(`Exit code: ${code}\n${stdout}`));
       }
-
-      return resolve();
+      return resolve(stdout);
     });
 
-    app.on("error", () => reject({ code: 1, stderr }));
+    app.on("error", () => reject(new Error(`Exit code: ${code}\n${stderr}`)));
   });
 
 /**
@@ -90,18 +89,51 @@ const exec = (cmd, args = []) =>
  * @returns {Promise<void>}
  */
 
-const commitFile = async () => {
+const commitFile = async (emptyCommit = false) => {
   await exec("git", ["config", "--global", "user.email", COMMIT_EMAIL]);
   await exec("git", ["config", "--global", "user.name", COMMIT_NAME]);
-  await exec("git", ["add", TARGET_FILE]);
-  await exec("git", ["commit", "-m", COMMIT_MSG]);
+  if (emptyCommit) {
+    await exec("git", ["commit", "--allow-empty", "-m", EMPTY_COMMIT_MSG]);
+  } else {
+    await exec("git", ["add", TARGET_FILE]);
+    await exec("git", ["commit", "-m", COMMIT_MSG]);
+  }
   await exec("git", ["push"]);
+};
+
+/**
+ * Creates an empty commit if no activity has been detected for over 50 days
+ * @returns {Promise<void>}
+ * */
+const createEmptyCommit = async () => {
+  const lastCommitDate = await exec("git", [
+    "--no-pager",
+    "log",
+    "-1",
+    "--format=%ct",
+  ]);
+
+  const commitDate = new Date(parseInt(lastCommitDate, 10) * 1000);
+  const diffInDays = Math.round(
+    (new Date() - commitDate) / (1000 * 60 * 60 * 24),
+  );
+
+  core.debug(`Last commit date: ${commitDate}`);
+  core.debug(`Difference in days: ${diffInDays}`);
+
+  if (diffInDays > 50) {
+    core.info("Create empty commit to keep workflow active");
+    await commitFile(true);
+    return "Empty commit pushed";
+  }
+
+  return "No PullRequest/Issue/IssueComment/Release events found. Leaving README unchanged with previous activity";
 };
 
 const serializers = {
   IssueCommentEvent: (item) => {
     return `🗣 Commented on ${toUrlFormat(item)} in ${toUrlFormat(
-      item.repo.name
+      item.repo.name,
     )}`;
   },
   IssuesEvent: (item) => {
@@ -120,7 +152,7 @@ const serializers = {
     }
 
     return `${emoji} ${capitalize(item.payload.action)} issue ${toUrlFormat(
-      item
+      item,
     )} in ${toUrlFormat(item.repo.name)}`;
   },
   PullRequestEvent: (item) => {
@@ -132,7 +164,7 @@ const serializers = {
   },
   ReleaseEvent: (item) => {
     return `🚀 ${capitalize(item.payload.action)} release ${toUrlFormat(
-      item
+      item,
     )} in ${toUrlFormat(item.repo.name)}`;
   },
 };
@@ -146,7 +178,7 @@ Toolkit.run(
       per_page: 100,
     });
     tools.log.debug(
-      `Activity for ${GH_USERNAME}, ${events.data.length} events found.`
+      `Activity for ${GH_USERNAME}, ${events.data.length} events found.`,
     );
 
     const content = events.data
@@ -163,25 +195,30 @@ Toolkit.run(
 
     // Find the index corresponding to <!--START_SECTION:activity--> comment
     let startIdx = readmeContent.findIndex(
-      (content) => content.trim() === "<!--START_SECTION:activity-->"
+      (content) => content.trim() === "<!--START_SECTION:activity-->",
     );
 
     // Early return in case the <!--START_SECTION:activity--> comment was not found
     if (startIdx === -1) {
       return tools.exit.failure(
-        `Couldn't find the <!--START_SECTION:activity--> comment. Exiting!`
+        `Couldn't find the <!--START_SECTION:activity--> comment. Exiting!`,
       );
     }
 
     // Find the index corresponding to <!--END_SECTION:activity--> comment
     const endIdx = readmeContent.findIndex(
-      (content) => content.trim() === "<!--END_SECTION:activity-->"
+      (content) => content.trim() === "<!--END_SECTION:activity-->",
     );
 
-    if (!content.length) {
-      tools.exit.success(
-        "No PullRequest/Issue/IssueComment/Release events found. Leaving README unchanged with previous activity"
-      );
+    if (content.length == 0) {
+      tools.log.info("Found no activity.");
+
+      try {
+        const message = await createEmptyCommit();
+        tools.exit.success(message);
+      } catch (err) {
+        return tools.exit.failure(err.message);
+      }
     }
 
     if (content.length < 5) {
@@ -192,14 +229,14 @@ Toolkit.run(
       // Add one since the content needs to be inserted just after the initial comment
       startIdx++;
       content.forEach((line, idx) =>
-        readmeContent.splice(startIdx + idx, 0, `${idx + 1}. ${line}`)
+        readmeContent.splice(startIdx + idx, 0, `${idx + 1}. ${line}`),
       );
 
       // Append <!--END_SECTION:activity--> comment
       readmeContent.splice(
         startIdx + content.length,
         0,
-        "<!--END_SECTION:activity-->"
+        "<!--END_SECTION:activity-->",
       );
 
       // Update README
@@ -209,8 +246,7 @@ Toolkit.run(
       try {
         await commitFile();
       } catch (err) {
-        const message = `Exit code: ${err.code}\n${err.stderr}`;
-        return tools.exit.failure(message);
+        return tools.exit.failure(err.message);
       }
       tools.exit.success("Wrote to README");
     }
@@ -260,13 +296,12 @@ Toolkit.run(
     try {
       await commitFile();
     } catch (err) {
-      const message = `Exit code: ${err.code}\n${err.stderr}`;
-      return tools.exit.failure(message);
+      return tools.exit.failure(err.message);
     }
     tools.exit.success("Pushed to remote repository");
   },
   {
     event: ["schedule", "workflow_dispatch"],
     secrets: ["GITHUB_TOKEN"],
-  }
+  },
 );

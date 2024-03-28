@@ -27,10 +27,14 @@ inputs:
     description: "The file location to write changes to"
     default: "README.md"
     required: false
+  EMPTY_COMMIT_MSG:
+    description: "Commit message used when there are no updates"
+    default: ":memo: empty commit to keep workflow active after 60 days of no activity"
+    required: false
 branding:
   color: yellow
   icon: activity
 
 runs:
-  using: node16
+  using: node20
   main: dist/index.js
