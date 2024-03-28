@@ -20456,7 +20456,7 @@ const exec = (cmd, args = []) =>
       if (code !== 0 && !stdout.includes("nothing to commit")) {
         return reject(new Error(`Exit code: ${code}\n${stdout}`));
       }
-      return resolve(stdout);
+      return resolve({ code, stdout });
     });
 
     app.on("error", () => reject(new Error(`Exit code: ${code}\n${stderr}`)));
@@ -20485,7 +20485,7 @@ const commitFile = async (emptyCommit = false) => {
  * @returns {Promise<void>}
  * */
 const createEmptyCommit = async () => {
-  const { lastCommitDate } = await exec("git", [
+  const { stdout: lastCommitDate } = await exec("git", [
     "--no-pager",
     "log",
     "-1",
@@ -20497,6 +20497,7 @@ const createEmptyCommit = async () => {
     (new Date() - commitDate) / (1000 * 60 * 60 * 24),
   );
 
+  core.debug(`Last commit date: ${commitDate}`)
   core.debug(`Difference in days: ${diffInDays}`);
 
   if (diffInDays > 50) {
