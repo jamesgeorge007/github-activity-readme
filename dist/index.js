@@ -20485,16 +20485,20 @@ const commitFile = async (emptyCommit = false) => {
  * @returns {Promise<void>}
  * */
 const createEmptyCommit = async () => {
-  const { lastCommitDate } = await exec(
-    "git",
-    ["--no-pager", "log", "-1", "--format=%ct"],
-    { encoding: "utf8", stdio: ["pipe", "pipe", "pipe"] },
-  );
+  const { lastCommitDate } = await exec("git", [
+    "--no-pager",
+    "log",
+    "-1",
+    "--format=%ct",
+  ]);
 
   const commitDate = new Date(parseInt(lastCommitDate, 10) * 1000);
   const diffInDays = Math.round(
     (new Date() - commitDate) / (1000 * 60 * 60 * 24),
   );
+
+  core.debug(`Difference in days: ${diffInDays}`);
+
   if (diffInDays > 50) {
     core.info("Create empty commit to keep workflow active");
     await commitFile(true);
