@@ -75,12 +75,12 @@ const exec = (cmd, args = []) =>
 
     app.on("close", (code) => {
       if (code !== 0 && !stdout.includes("nothing to commit")) {
-        return reject({ code, stderr });
+        return reject(new Error(`Exit code: ${code}\n${stdout}`));
       }
-      return resolve({ code, stdout });
+      return resolve(stdout);
     });
 
-    app.on("error", () => reject({ code: 1, stderr }));
+    app.on("error", () => reject(new Error(`Exit code: ${code}\n${stderr}`)));
   });
 
 /**
@@ -102,28 +102,27 @@ const commitFile = async (emptyCommit = false) => {
 };
 
 /**
- * Make empty commit
+ * Creates an empty commit if no activity has been detected for over 50 days
  * @returns {Promise<void>}
  * */
-const emptyCommit = async () => {
-  const { outputData } = await exec(
+const createEmptyCommit = async () => {
+  const { lastCommitDate } = await exec(
     "git",
     ["--no-pager", "log", "-1", "--format=%ct"],
     { encoding: "utf8", stdio: ["pipe", "pipe", "pipe"] },
   );
 
-  const commitDate = new Date(parseInt(outputData, 10) * 1000);
+  const commitDate = new Date(parseInt(lastCommitDate, 10) * 1000);
   const diffInDays = Math.round(
     (new Date() - commitDate) / (1000 * 60 * 60 * 24),
   );
-  if (diffInDays > 60) {
+  if (diffInDays > 50) {
     core.info("Create empty commit to keep workflow active");
     await commitFile(true);
-    tools.exit.success("Empty commit pushed.");
+    return "Empty commit pushed";
   }
-  tools.exit.success(
-    "No PullRequest/Issue/IssueComment/Release events found. Leaving README unchanged with previous activity",
-  );
+
+  return "No PullRequest/Issue/IssueComment/Release events found. Leaving README unchanged with previous activity";
 };
 
 const serializers = {
@@ -206,8 +205,15 @@ Toolkit.run(
       (content) => content.trim() === "<!--END_SECTION:activity-->",
     );
 
-    if (!content.length) {
-      await emptyCommit();
+    if (content.length == 0) {
+      tools.log.info("Found no activity.");
+
+      try {
+        const message = await createEmptyCommit();
+        tools.exit.success(message);
+      } catch (err) {
+        return tools.exit.failure(err.message);
+      }
     }
 
     if (content.length < 5) {
@@ -235,8 +241,7 @@ Toolkit.run(
       try {
         await commitFile();
       } catch (err) {
-        const message = `Exit code: ${err.code}\n${err.stderr}`;
-        return tools.exit.failure(message);
+        return tools.exit.failure(err.message);
       }
       tools.exit.success("Wrote to README");
     }
@@ -286,8 +291,7 @@ Toolkit.run(
     try {
       await commitFile();
     } catch (err) {
-      const message = `Exit code: ${err.code}\n${err.stderr}`;
-      return tools.exit.failure(message);
+      return tools.exit.failure(err.message);
     }
     tools.exit.success("Pushed to remote repository");
   },
