@@ -167,6 +167,9 @@ const serializers = {
       item,
     )} in ${toUrlFormat(item.repo.name)}`;
   },
+  PushEvent: (item) => {
+    return `⬆️ Pushed ${item.payload.size} commit(s) to ${toUrlFormat(item.repo.name)}`
+  }
 };
 
 Toolkit.run(
