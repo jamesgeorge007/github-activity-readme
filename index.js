@@ -192,6 +192,10 @@ Toolkit.run(
       // Call the serializer to construct a string
       .map((item) => serializers[item.type](item));
 
+    // REMOVE
+    tools.log.debug(content);
+    //
+
     const readmeContent = fs
       .readFileSync(`./${TARGET_FILE}`, "utf-8")
       .split("\n");
