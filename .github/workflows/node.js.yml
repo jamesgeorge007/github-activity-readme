@@ -10,10 +10,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Use Node 20
+      - name: Use Node 22
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
       - run: npm ci
       - run: npm run format:check
       - run: npm run build

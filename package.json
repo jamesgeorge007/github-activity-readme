@@ -1,6 +1,6 @@
 {
   "name": "github-activity-readme",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "description": "Updates README with the recent GitHub activity of a user",
   "main": "index.js",
   "keywords": [],
@@ -12,11 +12,11 @@
     "build": "ncc build index.js -o dist"
   },
   "dependencies": {
-    "@actions/core": "^1.10.1",
+    "@actions/core": "^1.11.1",
     "actions-toolkit": "^6.0.1"
   },
   "devDependencies": {
-    "@vercel/ncc": "^0.38.1",
-    "prettier": "^3.2.5"
+    "@vercel/ncc": "^0.38.3",
+    "prettier": "^3.4.2"
   }
 }
