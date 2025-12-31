@@ -19999,7 +19999,7 @@ const serializers = {
     )}`;
   },
   IssuesEvent: (item) => {
-    let emoji = "";
+    let emoji = "⚡";
 
     switch (item.payload.action) {
       case "opened":
@@ -20018,24 +20018,22 @@ const serializers = {
     )} in ${toUrlFormat(item.repo.name)}`;
   },
   PullRequestEvent: (item) => {
-    let emoji = "";
-    let actionText = "";
+    let emoji = "⚡";
+    let actionText = capitalize(item.payload.action);
 
-    // Check action type to determine emoji and text
-    // Note: GitHub Events API returns "merged" as an action type
-    if (item.payload.action === "opened") {
-      emoji = "💪";
-      actionText = "Opened";
-    } else if (item.payload.action === "closed") {
-      emoji = "❌";
-      actionText = "Closed";
-    } else if (item.payload.action === "merged") {
-      emoji = "🎉";
-      actionText = "Merged";
-    } else {
-      // Fallback for other actions
-      emoji = "⚡";
-      actionText = capitalize(item.payload.action);
+    switch (item.payload.action) {
+      case "opened":
+        emoji = "💪";
+        actionText = "Opened";
+        break;
+      case "closed":
+        emoji = "❌";
+        actionText = "Closed";
+        break;
+      case "merged":
+        emoji = "🎉";
+        actionText = "Merged";
+        break;
     }
 
     return `${emoji} ${actionText} PR ${toUrlFormat(item)} in ${toUrlFormat(item.repo.name)}`;
