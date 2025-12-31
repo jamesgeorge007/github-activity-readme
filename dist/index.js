@@ -19896,7 +19896,11 @@ const toUrlFormat = (item) => {
     return `[#${item.payload.issue.number}](${item.payload.issue.html_url})`;
   }
   if (Object.hasOwnProperty.call(item.payload, "pull_request")) {
-    return `[#${item.payload.pull_request.number}](${item.payload.pull_request.html_url})`;
+    // GitHub Events API doesn't include html_url in pull_request object
+    // We need to construct it from repo name and PR number
+    const prNumber = item.payload.pull_request.number;
+    const repoName = item.repo.name;
+    return `[#${prNumber}](https://github.com/${repoName}/pull/${prNumber})`;
   }
 
   if (Object.hasOwnProperty.call(item.payload, "release")) {
@@ -20014,11 +20018,27 @@ const serializers = {
     )} in ${toUrlFormat(item.repo.name)}`;
   },
   PullRequestEvent: (item) => {
-    const emoji = item.payload.action === "opened" ? "💪" : "❌";
-    const line = item.payload.pull_request.merged
-      ? "🎉 Merged"
-      : `${emoji} ${capitalize(item.payload.action)}`;
-    return `${line} PR ${toUrlFormat(item)} in ${toUrlFormat(item.repo.name)}`;
+    let emoji = "";
+    let actionText = "";
+
+    // Check action type to determine emoji and text
+    // Note: GitHub Events API returns "merged" as an action type
+    if (item.payload.action === "opened") {
+      emoji = "💪";
+      actionText = "Opened";
+    } else if (item.payload.action === "closed") {
+      emoji = "❌";
+      actionText = "Closed";
+    } else if (item.payload.action === "merged") {
+      emoji = "🎉";
+      actionText = "Merged";
+    } else {
+      // Fallback for other actions
+      emoji = "⚡";
+      actionText = capitalize(item.payload.action);
+    }
+
+    return `${emoji} ${actionText} PR ${toUrlFormat(item)} in ${toUrlFormat(item.repo.name)}`;
   },
   ReleaseEvent: (item) => {
     return `🚀 ${capitalize(item.payload.action)} release ${toUrlFormat(
