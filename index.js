@@ -202,7 +202,11 @@ Toolkit.run(
 
     const content = events.data
       // Filter out any boring activity
-      .filter((event) => serializers.hasOwnProperty(event.type) && FILTER_EVENTS.includes(event.type))
+      .filter(
+        (event) =>
+          serializers.hasOwnProperty(event.type) &&
+          FILTER_EVENTS.includes(event.type),
+      )
       // We only have five lines to work with
       .slice(0, MAX_LINES)
       // Call the serializer to construct a string
