@@ -33,7 +33,7 @@ inputs:
     required: false
   FILTER_EVENTS:
     description: "Events that should be displayed on profile"
-    default: [ "IssueCommentEvent", "IssuesEvent", "PullRequestEvent", "ReleaseEvent" ]
+    default: '[ "IssueCommentEvent", "IssuesEvent", "PullRequestEvent", "ReleaseEvent" ]'
     required: false
 
 branding:
