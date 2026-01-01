@@ -31,6 +31,11 @@ inputs:
     description: "Commit message used when there are no updates"
     default: ":memo: empty commit to keep workflow active after 60 days of no activity"
     required: false
+  FILTER_EVENTS:
+    description: "Events that should be displayed on profile"
+    default: [ "IssueCommentEvent", "IssuesEvent", "PullRequestEvent", "ReleaseEvent" ]
+    required: false
+
 branding:
   color: yellow
   icon: activity

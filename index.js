@@ -11,6 +11,7 @@ const COMMIT_MSG = core.getInput("COMMIT_MSG");
 const MAX_LINES = core.getInput("MAX_LINES");
 const TARGET_FILE = core.getInput("TARGET_FILE");
 const EMPTY_COMMIT_MSG = core.getInput("EMPTY_COMMIT_MSG");
+const FILTER_EVENTS = core.getInput("FILTER_EVENTS");
 
 /**
  * Returns the sentence case representation
@@ -201,7 +202,7 @@ Toolkit.run(
 
     const content = events.data
       // Filter out any boring activity
-      .filter((event) => serializers.hasOwnProperty(event.type))
+      .filter((event) => serializers.hasOwnProperty(event.type) && FILTER_EVENTS.includes(event.type))
       // We only have five lines to work with
       .slice(0, MAX_LINES)
       // Call the serializer to construct a string
