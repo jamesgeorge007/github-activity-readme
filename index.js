@@ -207,6 +207,8 @@ Toolkit.run(
       .slice(0, MAX_LINES)
       // Call the serializer to construct a string
       .map((item) => serializers[item.type](item));
+	
+	tools.log.debug(content)
 
     const readmeContent = fs
       .readFileSync(`./${TARGET_FILE}`, "utf-8")
