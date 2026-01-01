@@ -19862,13 +19862,15 @@ const { spawn } = __nccwpck_require__(5317);
 const { Toolkit } = __nccwpck_require__(2288);
 
 // Get config
-const GH_USERNAME = core.getInput("GH_USERNAME");
+const GH_USERNAME = "DogeTheBeast"
 const COMMIT_NAME = core.getInput("COMMIT_NAME");
 const COMMIT_EMAIL = core.getInput("COMMIT_EMAIL");
 const COMMIT_MSG = core.getInput("COMMIT_MSG");
-const MAX_LINES = core.getInput("MAX_LINES");
-const TARGET_FILE = core.getInput("TARGET_FILE");
+const MAX_LINES = 5
+const TARGET_FILE = "README.md"
 const EMPTY_COMMIT_MSG = core.getInput("EMPTY_COMMIT_MSG");
+// const FILTER_EVENTS = core.getInput("FILTER_EVENTS");
+const FILTER_EVENTS = '["IssueCommentEvent"]'
 
 /**
  * Returns the sentence case representation
@@ -20047,23 +20049,27 @@ const serializers = {
 
 Toolkit.run(
   async (tools) => {
+	console.log("Print")
+	tools.log.debug("Filters:" + FILTER_EVENTS)
     // Get the user's public events
-    tools.log.debug(`Getting activity for ${GH_USERNAME}`);
+    tools.log.debug(`Getting activity for ${GH_USERNAME} pls`);
     const events = await tools.github.activity.listPublicEventsForUser({
       username: GH_USERNAME,
       per_page: 100,
     });
     tools.log.debug(
-      `Activity for ${GH_USERNAME}, ${events.data.length} events found.`,
+      `Activity for ${GH_USERNAME}, ${events.data.length} events found YES.`,
     );
 
     const content = events.data
       // Filter out any boring activity
-      .filter((event) => serializers.hasOwnProperty(event.type))
+      .filter((event) => serializers.hasOwnProperty(event.type) && FILTER_EVENTS.includes(event.type))
       // We only have five lines to work with
       .slice(0, MAX_LINES)
       // Call the serializer to construct a string
       .map((item) => serializers[item.type](item));
+	
+	tools.log.debug(content)
 
     const readmeContent = fs
       .readFileSync(`./${TARGET_FILE}`, "utf-8")
@@ -20116,14 +20122,14 @@ Toolkit.run(
       );
 
       // Update README
-      fs.writeFileSync(`./${TARGET_FILE}`, readmeContent.join("\n"));
-
-      // Commit to the remote repository
-      try {
-        await commitFile();
-      } catch (err) {
-        return tools.exit.failure(err.message);
-      }
+      // fs.writeFileSync(`./${TARGET_FILE}`, readmeContent.join("\n"));
+      //
+      // // Commit to the remote repository
+      // try {
+      //   await commitFile();
+      // } catch (err) {
+      //   return tools.exit.failure(err.message);
+      // }
       tools.exit.success("Wrote to README");
     }
 
@@ -20166,18 +20172,18 @@ Toolkit.run(
     }
 
     // Update README
-    fs.writeFileSync(`./${TARGET_FILE}`, readmeContent.join("\n"));
-
-    // Commit to the remote repository
-    try {
-      await commitFile();
-    } catch (err) {
-      return tools.exit.failure(err.message);
-    }
+    // fs.writeFileSync(`./${TARGET_FILE}`, readmeContent.join("\n"));
+    //
+    // // Commit to the remote repository
+    // try {
+    //   await commitFile();
+    // } catch (err) {
+    //   return tools.exit.failure(err.message);
+    // }
     tools.exit.success("Pushed to remote repository");
   },
   {
-    event: ["schedule", "workflow_dispatch"],
+    // event: ["schedule", "workflow_dispatch"],
     secrets: ["GITHUB_TOKEN"],
   },
 );
