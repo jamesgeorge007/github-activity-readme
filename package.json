@@ -12,11 +12,11 @@
     "build": "ncc build index.js -o dist"
   },
   "dependencies": {
-    "@actions/core": "^1.11.1",
-    "actions-toolkit": "^6.0.1"
+    "@actions/core": "^2.0.1",
+    "@actions/github": "^6.0.1"
   },
   "devDependencies": {
-    "@vercel/ncc": "^0.38.3",
-    "prettier": "^3.4.2"
+    "@vercel/ncc": "^0.38.4",
+    "prettier": "^3.7.4"
   }
 }

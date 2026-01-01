@@ -1,7 +1,7 @@
 const core = require("@actions/core");
+const { getOctokit } = require("@actions/github");
 const fs = require("fs");
 const { spawn } = require("child_process");
-const { Toolkit } = require("actions-toolkit");
 
 // Get config
 const GH_USERNAME = core.getInput("GH_USERNAME");
@@ -188,15 +188,24 @@ const serializers = {
   },
 };
 
-Toolkit.run(
-  async (tools) => {
+const run = async () => {
+  try {
+    const token = process.env.GITHUB_TOKEN;
+
+    if (!token) {
+      core.setFailed("GITHUB_TOKEN is required to fetch activity.");
+      return;
+    }
+
+    const octokit = getOctokit(token);
+
     // Get the user's public events
-    tools.log.debug(`Getting activity for ${GH_USERNAME}`);
-    const events = await tools.github.activity.listPublicEventsForUser({
+    core.debug(`Getting activity for ${GH_USERNAME}`);
+    const events = await octokit.rest.activity.listPublicEventsForUser({
       username: GH_USERNAME,
       per_page: 100,
     });
-    tools.log.debug(
+    core.debug(
       `Activity for ${GH_USERNAME}, ${events.data.length} events found.`,
     );
 
@@ -223,9 +232,10 @@ Toolkit.run(
 
     // Early return in case the <!--START_SECTION:activity--> comment was not found
     if (startIdx === -1) {
-      return tools.exit.failure(
-        `Couldn't find the <!--START_SECTION:activity--> comment. Exiting!`,
+      core.setFailed(
+        "Couldn't find the <!--START_SECTION:activity--> comment. Exiting!",
       );
+      return;
     }
 
     // Find the index corresponding to <!--END_SECTION:activity--> comment
@@ -233,19 +243,20 @@ Toolkit.run(
       (content) => content.trim() === "<!--END_SECTION:activity-->",
     );
 
-    if (content.length == 0) {
-      tools.log.info("Found no activity.");
+    if (content.length === 0) {
+      core.info("Found no activity.");
 
       try {
         const message = await createEmptyCommit();
-        tools.exit.success(message);
+        core.info(message);
       } catch (err) {
-        return tools.exit.failure(err.message);
+        core.setFailed(err.message);
       }
+      return;
     }
 
     if (content.length < 5) {
-      tools.log.info("Found less than 5 activities");
+      core.info("Found less than 5 activities");
     }
 
     if (startIdx !== -1 && endIdx === -1) {
@@ -269,9 +280,11 @@ Toolkit.run(
       try {
         await commitFile();
       } catch (err) {
-        return tools.exit.failure(err.message);
+        core.setFailed(err.message);
+        return;
       }
-      tools.exit.success("Wrote to README");
+      core.info("Wrote to README");
+      return;
     }
 
     const oldContent = readmeContent.slice(startIdx + 1, endIdx).join("\n");
@@ -279,8 +292,10 @@ Toolkit.run(
       .map((line, idx) => `${idx + 1}. ${line}`)
       .join("\n");
 
-    if (oldContent.trim() === newContent.trim())
-      tools.exit.success("No changes detected");
+    if (oldContent.trim() === newContent.trim()) {
+      core.info("No changes detected");
+      return;
+    }
 
     startIdx++;
 
@@ -294,7 +309,7 @@ Toolkit.run(
         }
         readmeContent.splice(startIdx + idx, 0, `${idx + 1}. ${line}`);
       });
-      tools.log.success(`Wrote to ${TARGET_FILE}`);
+      core.info(`Wrote to ${TARGET_FILE}`);
     } else {
       // It is likely that a newline is inserted after the <!--START_SECTION:activity--> comment (code formatter)
       let count = 0;
@@ -309,7 +324,7 @@ Toolkit.run(
           count++;
         }
       });
-      tools.log.success(`Updated ${TARGET_FILE} with the recent activity`);
+      core.info(`Updated ${TARGET_FILE} with the recent activity`);
     }
 
     // Update README
@@ -319,12 +334,13 @@ Toolkit.run(
     try {
       await commitFile();
     } catch (err) {
-      return tools.exit.failure(err.message);
+      core.setFailed(err.message);
+      return;
     }
-    tools.exit.success("Pushed to remote repository");
-  },
-  {
-    event: ["schedule", "workflow_dispatch"],
-    secrets: ["GITHUB_TOKEN"],
-  },
-);
+    core.info("Pushed to remote repository");
+  } catch (error) {
+    core.setFailed(error.message);
+  }
+};
+
+run();

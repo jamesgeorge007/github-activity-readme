@@ -9,11 +9,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
-      - name: Use Node 22
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - name: Use Node 24
+        uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
       - run: npm ci
       - run: npm run format:check
       - run: npm run build
