@@ -58,6 +58,7 @@ Use the following `input params` to customize it for your use case:-
 | `EMPTY_COMMIT_MSG` | :memo: empty commit to keep workflow active after 60 days of no activity | Commit message used when there are no updates             |
 | `MAX_LINES`        | 5                                                                        | The maximum number of lines populated in your readme file |
 | `TARGET_FILE`      | README.md                                                                | The file to insert recent activity into                   |
+| `FILTER_EVENTS`    | IssueCommentEvent, IssuesEvent, PullRequestEvent, ReleaseEvent           | Display specific event type                               |
 
 ```yml
 name: Update README
