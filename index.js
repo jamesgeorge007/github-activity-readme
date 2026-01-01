@@ -141,7 +141,7 @@ const serializers = {
     )}`;
   },
   IssuesEvent: (item) => {
-    let emoji = "⚡";
+    let emoji = "ℹ️";
 
     switch (item.payload.action) {
       case "opened":
@@ -160,7 +160,7 @@ const serializers = {
     )} in ${toUrlFormat(item.repo.name)}`;
   },
   PullRequestEvent: (item) => {
-    let emoji = "⚡";
+    let emoji = "ℹ️";
     let actionText = capitalize(item.payload.action);
 
     switch (item.payload.action) {
