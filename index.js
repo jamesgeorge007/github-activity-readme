@@ -190,6 +190,7 @@ const serializers = {
 
 Toolkit.run(
   async (tools) => {
+	tools.log.debug("Filters:" + FILTER_EVENTS)
     // Get the user's public events
     tools.log.debug(`Getting activity for ${GH_USERNAME}`);
     const events = await tools.github.activity.listPublicEventsForUser({
