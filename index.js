@@ -193,7 +193,7 @@ Toolkit.run(
 	console.log("Print")
 	tools.log.debug("Filters:" + FILTER_EVENTS)
     // Get the user's public events
-    tools.log.debug(`Getting activity for ${GH_USERNAME}`);
+    tools.log.debug(`Getting activity for ${GH_USERNAME} pls`);
     const events = await tools.github.activity.listPublicEventsForUser({
       username: GH_USERNAME,
       per_page: 100,
