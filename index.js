@@ -198,7 +198,7 @@ Toolkit.run(
       per_page: 100,
     });
     tools.log.debug(
-      `Activity for ${GH_USERNAME}, ${events.data.length} events found.`,
+      `Activity for ${GH_USERNAME}, ${events.data.length} events found YES.`,
     );
 
     const content = events.data
