@@ -190,6 +190,7 @@ const serializers = {
 
 Toolkit.run(
   async (tools) => {
+	console.log("Print")
 	tools.log.debug("Filters:" + FILTER_EVENTS)
     // Get the user's public events
     tools.log.debug(`Getting activity for ${GH_USERNAME}`);
