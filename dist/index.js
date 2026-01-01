@@ -20048,16 +20048,14 @@ const serializers = {
 
 Toolkit.run(
   async (tools) => {
-	console.log("Print")
-	tools.log.debug("Filters:" + FILTER_EVENTS)
     // Get the user's public events
-    tools.log.debug(`Getting activity for ${GH_USERNAME} pls`);
+    tools.log.debug(`Getting activity for ${GH_USERNAME}`);
     const events = await tools.github.activity.listPublicEventsForUser({
       username: GH_USERNAME,
       per_page: 100,
     });
     tools.log.debug(
-      `Activity for ${GH_USERNAME}, ${events.data.length} events found YES.`,
+      `Activity for ${GH_USERNAME}, ${events.data.length} events found.`,
     );
 
     const content = events.data
