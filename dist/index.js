@@ -19862,15 +19862,14 @@ const { spawn } = __nccwpck_require__(5317);
 const { Toolkit } = __nccwpck_require__(2288);
 
 // Get config
-const GH_USERNAME = "DogeTheBeast"
+const GH_USERNAME = core.getInput("GH_USERNAME");
 const COMMIT_NAME = core.getInput("COMMIT_NAME");
 const COMMIT_EMAIL = core.getInput("COMMIT_EMAIL");
 const COMMIT_MSG = core.getInput("COMMIT_MSG");
-const MAX_LINES = 5
-const TARGET_FILE = "README.md"
+const MAX_LINES = core.getInput("MAX_LINES");
+const TARGET_FILE = core.getInput("TARGET_FILE");
 const EMPTY_COMMIT_MSG = core.getInput("EMPTY_COMMIT_MSG");
-// const FILTER_EVENTS = core.getInput("FILTER_EVENTS");
-const FILTER_EVENTS = '["IssueCommentEvent"]'
+const FILTER_EVENTS = core.getInput("FILTER_EVENTS");
 
 /**
  * Returns the sentence case representation
@@ -20122,14 +20121,14 @@ Toolkit.run(
       );
 
       // Update README
-      // fs.writeFileSync(`./${TARGET_FILE}`, readmeContent.join("\n"));
-      //
-      // // Commit to the remote repository
-      // try {
-      //   await commitFile();
-      // } catch (err) {
-      //   return tools.exit.failure(err.message);
-      // }
+      fs.writeFileSync(`./${TARGET_FILE}`, readmeContent.join("\n"));
+
+      // Commit to the remote repository
+      try {
+        await commitFile();
+      } catch (err) {
+        return tools.exit.failure(err.message);
+      }
       tools.exit.success("Wrote to README");
     }
 
@@ -20172,18 +20171,18 @@ Toolkit.run(
     }
 
     // Update README
-    // fs.writeFileSync(`./${TARGET_FILE}`, readmeContent.join("\n"));
-    //
-    // // Commit to the remote repository
-    // try {
-    //   await commitFile();
-    // } catch (err) {
-    //   return tools.exit.failure(err.message);
-    // }
+    fs.writeFileSync(`./${TARGET_FILE}`, readmeContent.join("\n"));
+
+    // Commit to the remote repository
+    try {
+      await commitFile();
+    } catch (err) {
+      return tools.exit.failure(err.message);
+    }
     tools.exit.success("Pushed to remote repository");
   },
   {
-    // event: ["schedule", "workflow_dispatch"],
+    event: ["schedule", "workflow_dispatch"],
     secrets: ["GITHUB_TOKEN"],
   },
 );
